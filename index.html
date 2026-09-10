@@ -436,6 +436,9 @@
                     <button class="back-btn" onclick="goBack()">← ফিরে যান</button>
                     <button class="file-btn admin-only" onclick="document.getElementById('fileInput').click()">📂 ফাইল যোগ/আপডেট করুন</button>
                     <button class="danger-btn admin-only" onclick="clearCategoryData()">🗑️ সব মুছে ফেলুন</button>
+                    <select id="searchFieldSelect" onchange="filterTable()" style="padding:9px 10px; border:1.5px solid var(--line); border-radius:var(--radius-sm); font-size:13px; background:#fff; max-width:160px;">
+                        <option value="">সব কলাম</option>
+                    </select>
                     <input type="text" id="searchInput" placeholder="সার্চ করুন..." oninput="filterTable()">
                 </div>
             </div>
@@ -452,6 +455,20 @@
                     <span id="colsText">0</span> টি কলাম
                 </div>
                 <div id="fileNamesShort" style="font-size:12px; color:#555;"></div>
+            </div>
+
+            <div id="batchSummaryBox" style="display:none; background:#eef4ff; border:1.5px solid #93b7f5; border-radius:10px; padding:14px 18px; margin-bottom:14px; display:flex; flex-wrap:wrap; align-items:center; gap:24px;">
+                <div style="font-size:14px; font-weight:700; color:#1e3a8a;">
+                    <span aria-hidden="true">🔎</span> BATCH NO: <span id="bsBatchNo" style="background:#fff; border:1.5px solid #93b7f5; border-radius:6px; padding:4px 10px; margin-left:4px;"></span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span id="bsProduction" style="background:#fff; border:1.5px solid #93b7f5; border-radius:6px; padding:6px 14px; font-weight:700; font-size:15px; color:#1e3a8a;"></span>
+                    <span style="font-size:12px; color:#555;">Production</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span id="bsExShort" style="background:#fff; border:1.5px solid #93b7f5; border-radius:6px; padding:6px 14px; font-weight:700; font-size:15px; color:#1e3a8a;"></span>
+                    <span id="bsExShortLabel" style="font-size:12px; color:#555;"></span>
+                </div>
             </div>
 
             <div id="dataFilterBar" style="display:none; background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:14px;">
@@ -1447,6 +1464,8 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             document.getElementById("tableArea").innerHTML = '<div class="no-data">লোড হচ্ছে...</div>';
             document.getElementById("infoBar").style.display = "none";
             document.getElementById("searchInput").value = "";
+            var _sfs = document.getElementById("searchFieldSelect"); if (_sfs) _sfs.innerHTML = '<option value="">সব কলাম</option>';
+            var _bsb = document.getElementById("batchSummaryBox"); if (_bsb) _bsb.style.display = "none";
             document.getElementById("hintText").style.display = "block";
             document.getElementById("loading").style.display = "block";
             document.getElementById("statusMsg").style.display = "none";
@@ -1469,6 +1488,7 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                     buildCombinedData();
                     updateInfoBar();
                     renderTable(allCombinedData);
+                    populateSearchFieldSelect();
                     buildDataFilterBar();
                 } else {
                     document.getElementById("tableArea").innerHTML = '<div class="no-data">এখনো কোনো ফাইল সেভ নেই। উপরের বাটন থেকে Excel ফাইল সিলেক্ট করুন। সব ফাইলের ডাটা একসাথে দেখাবে।</div>';
@@ -1545,6 +1565,7 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             buildCombinedData();
             updateInfoBar();
             renderTable(allCombinedData);
+            populateSearchFieldSelect();
             buildDataFilterBar();
 
             var badge = document.getElementById("savedBadge");
@@ -1628,30 +1649,54 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             return -1;
         }
 
+        function populateSearchFieldSelect() {
+            var sel = document.getElementById("searchFieldSelect");
+            if (!sel) return;
+            var prev = sel.value;
+            var html = '<option value="">সব কলাম</option>';
+            for (var i = 0; i < combinedHeaders.length; i++) {
+                var h = combinedHeaders[i];
+                if (h === undefined || h === null || String(h).trim() === "") continue;
+                html += '<option value="' + i + '">' + escapeHtml(h) + '</option>';
+            }
+            sel.innerHTML = html;
+            // keep previous selection if that column still exists
+            if (prev && sel.querySelector('option[value="' + prev + '"]')) {
+                sel.value = prev;
+            } else {
+                sel.value = "";
+            }
+        }
+
         function buildDataFilterBar() {
             var bar = document.getElementById("dataFilterBar");
             var box = document.getElementById("dataFilterControls");
             if (!bar || !box) return;
 
-            // Only for Breakdown tab (as requested)
-            if (currentCategory !== "Breakdown") {
+            // Field sets per category — add a category here to turn its filter bar on
+            var CATEGORY_FILTER_FIELDS = {
+                "Breakdown": [
+                    { key: "Year", labels: ["year", "yaear"] },
+                    { key: "Month", labels: ["month"] },
+                    { key: "Date", labels: ["date"] },
+                    { key: "Shift", labels: ["shift"] },
+                    { key: "Machine", labels: ["machine"] },
+                    { key: "SP", labels: ["sp"] }
+                ]
+            };
+
+            var fields = CATEGORY_FILTER_FIELDS[currentCategory];
+            if (!fields) {
                 bar.style.display = "none";
                 box.innerHTML = "";
                 window._dataFilterMeta = {};
                 return;
             }
 
-            var fields = [
-                { key: "Year", labels: ["year", "yaear"] },
-                { key: "Month", labels: ["month"] },
-                { key: "Date", labels: ["date"] },
-                { key: "Shift", labels: ["shift"] },
-                { key: "Machine", labels: ["machine"] },
-                { key: "SP", labels: ["sp"] }
-            ];
-
+            var fieldLabelMap = {};
             var available = [];
             for (var f = 0; f < fields.length; f++) {
+                fieldLabelMap[fields[f].key] = fields[f].label || fields[f].key;
                 var idx = findHeaderIndex(fields[f].labels);
                 if (idx >= 0) available.push({ key: fields[f].key, idx: idx });
             }
@@ -1680,12 +1725,12 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             window._dataFilterMeta = options;
 
             var html = "";
-            var keys = ["Year", "Month", "Date", "Shift", "Machine", "SP"];
-            for (var i = 0; i < keys.length; i++) {
-                var k = keys[i];
+            for (var i = 0; i < fields.length; i++) {
+                var k = fields[i].key;
                 if (!options[k]) continue;
+                var kLabel = fieldLabelMap[k] || k;
                 html += '<select id="df_' + k + '" onchange="applyDataFilters()" style="padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-size:12px; min-width:110px;">';
-                html += '<option value="">সব ' + k + '</option>';
+                html += '<option value="">সব ' + kLabel + '</option>';
                 for (var j = 0; j < options[k].list.length; j++) {
                     html += '<option value="' + escapeHtml(options[k].list[j]) + '">' + escapeHtml(options[k].list[j]) + '</option>';
                 }
@@ -1707,6 +1752,8 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             }
             var s = document.getElementById("searchInput");
             if (s) s.value = "";
+            var fs = document.getElementById("searchFieldSelect");
+            if (fs) fs.value = "";
             applyDataFilters();
         }
 
@@ -1725,22 +1772,111 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                 var query = (document.getElementById("searchInput") || {}).value || "";
                 query = query.toLowerCase().trim();
                 if (query) {
-                    var hit = false;
-                    for (var c = 0; c < row.length; c++) {
-                        if (String(row[c] === null || row[c] === undefined ? "" : row[c]).toLowerCase().indexOf(query) >= 0) {
-                            hit = true; break;
+                    var fieldSel = document.getElementById("searchFieldSelect");
+                    var fieldIdx = fieldSel && fieldSel.value !== "" ? parseInt(fieldSel.value, 10) : -1;
+                    if (fieldIdx >= 0) {
+                        var cellVal = row[fieldIdx];
+                        var hit = String(cellVal === null || cellVal === undefined ? "" : cellVal).toLowerCase().indexOf(query) >= 0;
+                        if (!hit) return false;
+                    } else {
+                        var hit = false;
+                        for (var c = 0; c < row.length; c++) {
+                            if (String(row[c] === null || row[c] === undefined ? "" : row[c]).toLowerCase().indexOf(query) >= 0) {
+                                hit = true; break;
+                            }
                         }
+                        if (!hit) return false;
                     }
-                    if (!hit) return false;
                 }
                 return true;
             });
             var cnt = document.getElementById("dataFilterCount");
             if (cnt) cnt.textContent = "দেখাচ্ছে: " + filtered.length.toLocaleString() + " / " + allCombinedData.length.toLocaleString();
+            updateBatchSummary(filtered);
             renderTable(filtered);
         }
 
+        function toNum(v) {
+            var n = parseFloat(String(v === null || v === undefined ? "" : v).replace(/,/g, "").trim());
+            return isNaN(n) ? 0 : n;
+        }
+
+        function updateBatchSummary(filtered) {
+            var box = document.getElementById("batchSummaryBox");
+            if (!box) return;
+
+            var batchIdx = findHeaderIndex(["batch no", "batchno", "batch"]);
+            var prodIdx = findHeaderIndex(["production"]);
+            var coneIdx = findHeaderIndex(["cone"]);
+            var exShortIdx = findHeaderIndex(["ex/short", "ex / short", "exshort", "short/excess", "ex-short"]);
+
+            if (batchIdx < 0 || !filtered.length) { box.style.display = "none"; return; }
+
+            // Collect distinct, non-empty batch numbers among the filtered rows
+            var distinctBatches = {};
+            for (var i = 0; i < filtered.length; i++) {
+                var b = String(filtered[i][batchIdx] === null || filtered[i][batchIdx] === undefined ? "" : filtered[i][batchIdx]).trim();
+                if (b) distinctBatches[b] = true;
+            }
+            var batchKeys = Object.keys(distinctBatches);
+            if (batchKeys.length !== 1) { box.style.display = "none"; return; }
+
+            var batchNo = batchKeys[0];
+
+            // Total production for this batch
+            var totalProduction = 0;
+            if (prodIdx >= 0) {
+                for (var i = 0; i < filtered.length; i++) totalProduction += toNum(filtered[i][prodIdx]);
+            }
+
+            // Find the row that carries the Ex/Short verdict (Short / Excess) and its quantity
+            var exShortLabel = "";
+            var exShortQty = 0;
+            if (exShortIdx >= 0) {
+                for (var i = 0; i < filtered.length; i++) {
+                    var v = String(filtered[i][exShortIdx] === null || filtered[i][exShortIdx] === undefined ? "" : filtered[i][exShortIdx]).trim();
+                    if (v && v !== "0") {
+                        exShortLabel = v;
+                        exShortQty = coneIdx >= 0 ? toNum(filtered[i][coneIdx]) : toNum(v);
+                        break;
+                    }
+                }
+            }
+
+            document.getElementById("bsBatchNo").textContent = batchNo;
+            document.getElementById("bsProduction").textContent = totalProduction.toLocaleString();
+
+            var exShortEl = document.getElementById("bsExShort");
+            var exShortLabelEl = document.getElementById("bsExShortLabel");
+            if (exShortLabel) {
+                var lower = exShortLabel.toLowerCase();
+                if (lower.indexOf("short") >= 0) {
+                    exShortEl.textContent = "(" + Math.abs(exShortQty).toLocaleString() + ")";
+                    exShortEl.style.color = "#b91c1c";
+                } else {
+                    exShortEl.textContent = Math.abs(exShortQty).toLocaleString();
+                    exShortEl.style.color = "#15803d";
+                }
+                exShortLabelEl.textContent = exShortLabel;
+            } else {
+                exShortEl.textContent = "0";
+                exShortEl.style.color = "#1e3a8a";
+                exShortLabelEl.textContent = "Ex/Short";
+            }
+
+            box.style.display = "flex";
+        }
+
         function filterTable() {
+            var fieldSel = document.getElementById("searchFieldSelect");
+            var box = document.getElementById("searchInput");
+            if (fieldSel && box) {
+                if (fieldSel.value !== "") {
+                    box.placeholder = fieldSel.options[fieldSel.selectedIndex].text + " দিয়ে সার্চ করুন...";
+                } else {
+                    box.placeholder = "সার্চ করুন...";
+                }
+            }
             applyDataFilters();
         }
 
