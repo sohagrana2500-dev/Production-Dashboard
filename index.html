@@ -728,7 +728,7 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                 var rows = [];
                 var from = 0;
                 while (true) {
-                    var q = supabaseClient.from("pd_files").select("*").order("chunk_index", { ascending: true }).range(from, from + PAGE_SIZE - 1);
+                    var q = supabaseClient.from("pd_files").select("*").order("base_id", { ascending: true }).order("chunk_index", { ascending: true }).range(from, from + PAGE_SIZE - 1);
                     if (idsToFetch) q = q.in("base_id", idsToFetch);
                     var page = await q;
                     if (page.error) {
@@ -749,9 +749,17 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                     groups[bid2].push(r);
                 }
                 var n = 0;
+                var incomplete = [];
                 for (var bid3 in groups) {
                     var parts = groups[bid3].sort(function(a, b) { return (a.chunk_index || 0) - (b.chunk_index || 0); });
                     var first = parts[0];
+                    var expectedTotal = first.chunk_total || parts.length;
+                    if (parts.length !== expectedTotal) {
+                        // Some chunks for this file went missing during the fetch — do NOT
+                        // save a partial/corrupt copy, flag it instead so it can be retried.
+                        incomplete.push((first.category || "") + " / " + (first.file_name || bid3) + " (" + parts.length + "/" + expectedTotal + " chunk)");
+                        continue;
+                    }
                     var mergedData = [];
                     for (var p = 0; p < parts.length; p++) mergedData = mergedData.concat(parts[p].data || []);
                     try {
@@ -766,11 +774,25 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                         n++;
                     } catch (e) { console.warn(e); }
                 }
+                // Detect files that were expected (per the version check) but never came back at all
+                if (idsToFetch) {
+                    var gotIds = {};
+                    for (var gb in groups) gotIds[gb] = true;
+                    for (var ei = 0; ei < idsToFetch.length; ei++) {
+                        if (!gotIds[idsToFetch[ei]]) incomplete.push(idsToFetch[ei] + " (কোনো chunk পাওয়া যায়নি)");
+                    }
+                }
+                if (incomplete.length > 0) {
+                    try {
+                        showStatus("⚠️ সিঙ্ক অসম্পূর্ণ — এই ফাইলগুলো পুরোপুরি আসেনি, আবার 🔄 রিসিঙ্ক করুন: " + incomplete.join(", "), true);
+                    } catch (e) { console.warn("status display failed", e); }
+                }
                 return n;
             } catch (e) {
                 console.warn("cloudPullAllFiles", e);
                 return 0;
             }
+
         }
 
         async function cloudLoadViewUsers() {
