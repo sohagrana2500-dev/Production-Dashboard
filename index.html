@@ -1919,20 +1919,49 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                     tempFiles[f.fileName] = { headers: f.headers, data: f.data };
                 }
 
+                function normHeader(h) {
+                    return String(h === null || h === undefined ? "" : h).toLowerCase().replace(/\s+/g, " ").trim();
+                }
+
                 var fileNames = Object.keys(tempFiles).sort();
-                var firstHeaders = tempFiles[fileNames[0]].headers || [];
+
+                // Canonical column list = UNION of headers seen across every file in this
+                // category (not just the first file), so a column that only appears in a
+                // later file's spreadsheet is still included instead of silently dropped.
+                var firstHeaders = [];
+                var seenNorm = {};
+                for (var fi = 0; fi < fileNames.length; fi++) {
+                    var hdrs = tempFiles[fileNames[fi]].headers || [];
+                    for (var hi2 = 0; hi2 < hdrs.length; hi2++) {
+                        var hname = hdrs[hi2];
+                        var hn2 = normHeader(hname);
+                        if (hn2 === "" || seenNorm[hn2]) continue;
+                        seenNorm[hn2] = true;
+                        firstHeaders.push(hname);
+                    }
+                }
+
                 var allRows = [];
                 for (var i = 0; i < fileNames.length; i++) {
                     var fname = fileNames[i];
                     var fdata = tempFiles[fname].data || [];
+
                     var fheaders = tempFiles[fname].headers || [];
+                    // Build a normalized-header -> index map for THIS file once,
+                    // so column lookups below never fall back to a raw position.
+                    var normIdxMap = {};
+                    for (var ni = 0; ni < fheaders.length; ni++) {
+                        var nkey = normHeader(fheaders[ni]);
+                        if (nkey !== "" && normIdxMap[nkey] === undefined) normIdxMap[nkey] = ni;
+                    }
                     for (var r = 0; r < fdata.length; r++) {
                         var row = fdata[r];
                         var obj = {};
                         for (var h = 0; h < firstHeaders.length; h++) {
                             var colName = firstHeaders[h];
                             var idx = fheaders.indexOf(colName);
-                            var val = (idx >= 0) ? row[idx] : (row[h] !== undefined ? row[h] : "");
+                            if (idx < 0) idx = normIdxMap[normHeader(colName)];
+                            var val = (idx !== undefined && idx >= 0) ? row[idx] : "";
                             obj[colName] = formatCellValue(val);
                         }
                         // also keep original numeric for summing
