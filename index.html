@@ -412,6 +412,7 @@
         <div class="header">
             <h1><span aria-hidden="true">📊</span> Production Dashboard <span class="saved-badge" style="font-size:10px; padding:4px 8px; margin-left:4px;">LOCAL</span> <span id="cloudBadge" class="saved-badge" style="font-size:10px; padding:4px 8px; margin-left:4px; background:#647789;">CLOUD?</span> <span id="roleBadge" class="role-badge role-admin">ADMIN</span></h1>
             <div style="display:flex; gap:8px; align-items:center;">
+                <button class="backup-btn admin-only" onclick="forceResync()" title="লোকাল ক্যাশ মুছে ক্লাউড থেকে সব ডাটা আবার নতুন করে আনুন">🔄 রিসিঙ্ক</button>
                 <button class="backup-btn admin-only" onclick="openUserManager()" title="ইউজার ম্যানেজ করুন">👥 ইউজার</button>
                 <button class="backup-btn admin-only" onclick="exportAllData()" title="সব ডাটার একটি ব্যাকআপ ফাইল ডাউনলোড করুন">⬇️ ব্যাকআপ নিন</button>
                 <button class="backup-btn admin-only" onclick="document.getElementById('restoreInput').click()" title="আগের ব্যাকআপ ফাইল থেকে ডাটা ফিরিয়ে আনুন">⬆️ রিস্টোর করুন</button>
@@ -985,6 +986,25 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                     reject(e);
                 }
             });
+        }
+
+        async function forceResync() {
+            if (!currentUser || currentUser.role !== "admin") { showStatus("শুধু Admin রিসিঙ্ক করতে পারে।", true); return; }
+            if (!confirm("লোকাল ক্যাশের সব ডাটা মুছে ক্লাউড থেকে আবার নতুন করে আনা হবে। চালিয়ে যেতে চান?")) return;
+            try {
+                showStatus("রিসিঙ্ক হচ্ছে, একটু সময় লাগতে পারে...", false);
+                await new Promise(function(resolve, reject) {
+                    var tx = db.transaction("files", "readwrite");
+                    var store = tx.objectStore("files");
+                    var req = store.clear();
+                    req.onsuccess = function() { resolve(); };
+                    req.onerror = function() { reject(req.error); };
+                });
+                var n = await cloudPullAllFilesIntoLocal();
+                showStatus("রিসিঙ্ক সম্পন্ন — " + n + "টি ফাইল ক্লাউড থেকে আনা হয়েছে।", false);
+            } catch (e) {
+                showStatus("রিসিঙ্ক ব্যর্থ হয়েছে: " + (e && e.message || e), true);
+            }
         }
 
         async function saveFileToDB(category, fileName, fileHeaders, fileData, size) {
