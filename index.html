@@ -212,6 +212,22 @@
         .welcome-banner p { position:relative; z-index:1; max-width:760px; font-size:14px; }
         .welcome-marquee-wrap { position:relative; left:50%; width:100vw; margin-left:-50vw; overflow:hidden; padding:6px 0; }
         .welcome-marquee-text { display:inline-block; white-space:nowrap; font-size:40px; font-weight:800; letter-spacing:-0.5px; animation: welcomeMarquee 50s linear infinite; }
+        
+        /* 🔄 একমুখী লুপ অ্যানিমেশন (ডান থেকে বামে) */
+        @keyframes welcomeMarquee {
+            0% { 
+                transform: translateX(100vw); /* স্ক্রিনের একদম ডান দিক থেকে লেখা শুরু হবে */
+            }
+            100% { 
+                transform: translateX(-100%); /* লেখাটি সম্পূর্ণ বামে লুকিয়ে যাওয়ার পর আবার ডান থেকে আসবে */
+            }
+        }
+
+        /* 💡 (ঐচ্ছিক) মাউস রাখলে মারকুই থামানোর জন্য নিচের কোডটি যোগ করতে পারেন */
+        .welcome-marquee-wrap:hover .welcome-marquee-text {
+            animation-play-state: paused;
+        }
+
         @keyframes welcomeMarquee {
             0%    { transform: translateX(100vw); color:#e63946; }
             24.9% { color:#e63946; }
