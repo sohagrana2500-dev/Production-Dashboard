@@ -210,6 +210,19 @@
         .welcome-banner .welcome-icon { display:inline-grid; place-items:center; width:52px; height:52px; margin-bottom:16px; border-radius:15px; background:#e8f5f8; font-size:27px; }
         .welcome-banner h2 { position:relative; z-index:1; font-size:27px; letter-spacing:-.5px; }
         .welcome-banner p { position:relative; z-index:1; max-width:760px; font-size:14px; }
+        .welcome-marquee-wrap { position:relative; left:50%; width:100vw; margin-left:-50vw; overflow:hidden; padding:6px 0; }
+        .welcome-marquee-text { display:inline-block; white-space:nowrap; font-size:40px; font-weight:800; letter-spacing:-0.5px; animation: welcomeMarquee 28s linear infinite; }
+        @keyframes welcomeMarquee {
+            0%    { transform: translateX(100vw); color:#e63946; }
+            24.9% { color:#e63946; }
+            25%   { transform: translateX(-100vw); color:#1d9bf0; }
+            49.9% { color:#1d9bf0; }
+            50%   { transform: translateX(100vw); color:#f4a300; }
+            74.9% { color:#f4a300; }
+            75%   { transform: translateX(-100vw); color:#2a9d8f; }
+            99.9% { color:#2a9d8f; }
+            100%  { transform: translateX(100vw); color:#e63946; }
+        }
         .category-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); gap:18px; margin:20px 0 32px; }
         .category-card, .category-btn { border:1px solid var(--line); }
         .category-card { border-top:3px solid var(--steel); border-radius:15px; box-shadow:var(--shadow); background:rgba(255,255,255,.96); }
@@ -219,6 +232,60 @@
         .category-btn .icon { display:inline-grid; place-items:center; width:56px; height:56px; margin-bottom:12px; border-radius:16px; background:#edf7fa; font-size:28px; }
         .category-btn h3 { font-size:16px; }
         .category-btn p { font-size:13px; }
+
+        /* ── List-style category menu with reveal-on-hover summary ─────────────────────────────── */
+        .category-grid {
+            display:flex !important; flex-direction:column; gap:4px;
+            max-width:640px; padding:10px; margin:20px auto 32px; border-radius:18px;
+            background:rgba(255,255,255,.85); backdrop-filter:blur(10px);
+            border:1px solid rgba(219,230,237,.8); box-shadow:var(--shadow);
+        }
+        .category-card {
+            position:relative; display:flex; align-items:stretch; border:1px solid transparent;
+            border-radius:12px; background:transparent; overflow:hidden;
+            transition:background .2s ease, border-color .2s ease;
+        }
+        .category-card:hover { background:rgba(34,124,157,.06); border-color:rgba(34,124,157,.18); }
+        .category-card + .category-card { border-top:1px solid rgba(219,230,237,.6); margin-top:2px; }
+        .category-card:hover + .category-card, .category-card:has(+ .category-card:hover) { border-top-color:transparent; }
+        .category-card .category-btn {
+            display:grid; grid-template-columns:42px 1fr auto; align-items:center; column-gap:14px;
+            flex:1; border:0; background:transparent; cursor:pointer;
+            padding:12px 16px; min-height:0; box-shadow:none; text-align:left; position:relative;
+        }
+        .category-card .icon {
+            width:42px; height:42px; min-width:42px; display:inline-grid; place-items:center;
+            border-radius:12px; font-size:19px; margin:0;
+            background:linear-gradient(150deg, rgba(34,124,157,.16), rgba(244,163,64,.16));
+            box-shadow:inset 0 0 0 1px rgba(34,124,157,.15); transition:transform .25s ease;
+        }
+        .category-card:hover .icon { transform:scale(1.08) rotate(-3deg); }
+        .nav-text { display:flex; flex-direction:column; line-height:1.25; min-width:0; }
+        .nav-title { font-size:14px; font-weight:700; color:var(--ink); letter-spacing:-.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .nav-sub { font-size:11px; color:var(--muted); font-weight:500; }
+        .category-card .badge {
+            position:static; justify-self:end; padding:3px 9px; font-size:10px;
+            background:linear-gradient(120deg, #2f9e63, #57c98a); color:#fff; border-radius:20px;
+            box-shadow:0 3px 8px rgba(47,158,99,.35); border:1px solid rgba(255,255,255,.5); font-weight:700; white-space:nowrap;
+        }
+        .category-card .summary-btn {
+            width:0; min-width:0; padding:0 !important; margin:6px 0 6px -6px !important; font-size:14px !important; border:0;
+            border-radius:10px !important; cursor:pointer; opacity:0; overflow:hidden; pointer-events:none;
+            background:linear-gradient(90deg, var(--ink-2), var(--steel)) !important; color:#fff;
+            display:flex; align-items:center; justify-content:center; gap:6px; align-self:center;
+            transition:width .28s ease, opacity .2s ease, margin .28s ease, filter .2s ease;
+            white-space:nowrap;
+        }
+        .category-card:hover .summary-btn {
+            width:116px; min-width:116px; opacity:1; pointer-events:auto; margin:6px 12px 6px 0 !important;
+        }
+        .category-card .summary-btn:hover { filter:brightness(1.12); }
+        @media (max-width:700px) {
+            .category-card .category-btn { padding:11px 12px; gap:10px; }
+            .category-card:hover .summary-btn { width:44px; min-width:44px; }
+            .summary-btn-text { display:none; }
+        }
+
         .summary-btn { padding:12px 10px !important; font-size:14px !important; }
         .summary-btn { border-radius:0 0 14px 14px; background:linear-gradient(90deg, var(--amber-dark), var(--amber)); }
         .data-section, .summary-section, .chart-section { border:1px solid var(--line); box-shadow:var(--shadow-lg); }
@@ -237,7 +304,7 @@
         .kpi-card { border:1px solid var(--line); border-left-width:4px; box-shadow:var(--shadow); }
         .saved-badge { box-shadow:0 3px 8px rgba(47,125,82,.2); }
         @media (max-width:1100px) { .category-grid { grid-template-columns:repeat(3, 1fr); gap:14px; } }
-        @media (max-width:700px) { .dashboard { padding:12px 10px 32px; } .header { position:relative; top:0; align-items:flex-start; gap:12px; flex-direction:column; } .header > div { width:100%; flex-wrap:wrap; } .header button { flex:1; min-width:105px; } .welcome-banner { padding:28px 20px; } .welcome-banner h2 { font-size:22px; } .category-grid { grid-template-columns:repeat(2, 1fr); gap:10px; } .data-section, .summary-section, .chart-section { padding:16px; } .data-header { align-items:flex-start; } .controls { width:100%; } .controls input[type=text] { width:100%; min-width:0; } .controls button, .file-btn { flex:1; } }
+        @media (max-width:700px) { .dashboard { padding:12px 10px 32px; } .header { position:relative; top:0; align-items:flex-start; gap:12px; flex-direction:column; } .header > div { width:100%; flex-wrap:wrap; } .header button { flex:1; min-width:105px; } .welcome-banner { padding:28px 20px; } .welcome-banner h2 { font-size:22px; } .welcome-marquee-text { font-size:24px; } .category-grid { grid-template-columns:repeat(2, 1fr); gap:10px; } .data-section, .summary-section, .chart-section { padding:16px; } .data-header { align-items:flex-start; } .controls { width:100%; } .controls input[type=text] { width:100%; min-width:0; } .controls button, .file-btn { flex:1; } }
         @media (prefers-reduced-motion: reduce) { *, *:before, *:after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; } }
 
     
@@ -408,6 +475,10 @@
         </div>
     </div>
 
+    <div class="welcome-marquee-wrap">
+        <span class="welcome-marquee-text">Welcome to Production Dashboard</span>
+    </div>
+
     <div class="dashboard" id="dashboard">
         <div class="header">
             <h1><span aria-hidden="true">📊</span> Production Dashboard <span class="saved-badge" style="font-size:10px; padding:4px 8px; margin-left:4px;">LOCAL</span> <span id="cloudBadge" class="saved-badge" style="font-size:10px; padding:4px 8px; margin-left:4px; background:#647789;">CLOUD?</span> <span id="roleBadge" class="role-badge role-admin">ADMIN</span></h1>
@@ -422,11 +493,6 @@
         </div>
 
         <div id="categorySection">
-            <div class="welcome-banner">
-                <div class="welcome-icon" aria-hidden="true">🏭</div>
-                <h2>স্বাগতম, Production Dashboard-এ</h2>
-                <p>উৎপাদনের সবগুলো রেকর্ড এক জায়গায় — নিচের যেকোনো ক্যাটাগরি বেছে নিয়ে ডাটা দেখুন, নতুন ফাইল আপলোড করুন, অথবা সামারি ও চার্ট দেখে বিশ্লেষণ করুন।</p>
-            </div>
             <div class="category-grid" id="categoryGrid"></div>
         </div>
 
@@ -1213,15 +1279,14 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             for (var i = 0; i < CATEGORIES.length; i++) {
                 var cat = CATEGORIES[i];
                 var count = counts[i];
-                var badge = count > 0 ? '<span class="badge">' + count + ' ফাইল</span>' : "";
+                var badge = count > 0 ? '<span class="badge">' + count + '</span>' : "";
                 html += '<div class="category-card">' +
+                    '<button class="category-btn" onclick="openCategory(\'' + cat + '\')">' +
+                    '<span class="icon">' + getIcon(cat) + '</span>' +
+                    '<span class="nav-text"><span class="nav-title">' + cat + '</span><span class="nav-sub">' + (count > 0 ? count + ' ফাইল' : 'খালি') + '</span></span>' +
                     badge +
-                    '<div class="category-btn" onclick="openCategory(\'' + cat + '\')">' +
-                    '<div class="icon">' + getIcon(cat) + '</div>' +
-                    '<h3>' + cat + ' Data</h3>' +
-                    '<p>' + (count > 0 ? count + ' টি ফাইল সেভ আছে' : 'কোনো ফাইল নেই') + '</p>' +
-                    '</div>' +
-                    '<button class="summary-btn" onclick="event.stopPropagation(); openSummary(\'' + cat + '\')">📊 সামারি</button>' +
+                    '</button>' +
+                    '<button class="summary-btn" title="' + cat + ' সামারি" onclick="event.stopPropagation(); openSummary(\'' + cat + '\')"><span class="summary-btn-icon">📊</span><span class="summary-btn-text">সামারি</span></button>' +
                     '</div>';
             }
             grid.innerHTML = html;
