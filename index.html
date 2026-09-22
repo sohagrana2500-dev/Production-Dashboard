@@ -226,22 +226,22 @@
     font-weight: 800; 
     letter-spacing: -0.5px; 
     
-    /* লেখাটি স্ক্রিনের একদম ডান পাশ থেকে শুরু করার জন্য padding-left */
-    padding-left: 100%; 
-    
-    /* ৫০ সেকেন্ড স্পীড */
-    animation: welcomeMarquee 50s linear infinite; 
+    /* 🔄 alternate যুক্ত করা হয়েছে যেন ডানে-বামে ধাক্কা খেয়ে ফিরে আসে */
+    animation: welcomeMarquee 25s linear infinite alternate; 
 }
 
-/* 🔄 নিখুঁত একমুখী লুপ (কোনো বাড়তি লেট বা গ্যাপ হবে না) */
+/* 🎯 দুই পাশে টাচ করার সাথে সাথে মুভ করার নিখুঁত লজিক */
 @keyframes welcomeMarquee {
     0% { 
-        transform: translate3d(0, 0, 0); 
+        /* একদম ডান সাইডের দেয়ালে লেখাটি টাচ করে থাকবে */
+        transform: translateX(calc(100vw - 100%)); 
     }
     100% { 
-        transform: translate3d(-100%, 0, 0); 
+        /* একদম বাম সাইডের দেয়ালে লেখাটি টাচ করে থাকবে */
+        transform: translateX(0); 
     }
 }
+
 
 
         /* 💡 (ঐচ্ছিক) মাউস রাখলে মারকুই থামানোর জন্য নিচের কোডটি যোগ করতে পারেন */
