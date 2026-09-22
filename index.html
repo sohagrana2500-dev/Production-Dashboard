@@ -217,33 +217,32 @@
     margin-left: -50vw; 
     overflow: hidden; 
     padding: 6px 0; 
+    background: rgba(0, 0, 0, 0.1); /* সীমানা সহজে বোঝার জন্য হালকা ব্যাকগ্রাউন্ড (ঐচ্ছিক) */
 }
 
-.welcome-marquee-text { 
+    .welcome-marquee-text { 
     display: inline-block; 
     white-space: nowrap; 
     font-size: 40px; 
     font-weight: 800; 
     letter-spacing: -0.5px; 
+    width: max-content; /* লেখার নিজস্ব সাইজ নিখুঁতভাবে ধরে রাখার জন্য */
     
-    /* 🔄 alternate যুক্ত করা হয়েছে যেন ডানে-বামে ধাক্কা খেয়ে ফিরে আসে */
+    /* 🔄 ডানে-বামে ধাক্কা খেয়ে ফিরে আসার জন্য alternate এবং গতি সমান রাখার জন্য linear */
     animation: welcomeMarquee 25s linear infinite alternate; 
 }
 
-/* 🎯 দুই পাশে টাচ করার সাথে সাথে মুভ করার নিখুঁত লজিক */
+/* 🎯 স্ক্রিনের দুই বর্ডারে টাচ করার সাথে সাথে মুভ করার নিখুঁত লজিক */
 @keyframes welcomeMarquee {
     0% { 
-        /* একদম ডান সাইডের দেয়ালে লেখাটি টাচ করে থাকবে */
-        transform: translateX(calc(100vw - 100%)); 
+        /* একদম বাম সাইডের দেয়াল স্পর্শ করে থাকবে */
+        transform: translateX(0%); 
     }
     100% { 
-        /* একদম বাম সাইডের দেয়ালে লেখাটি টাচ করে থাকবে */
-        transform: translateX(0); 
+        /* একদম ডান সাইডের দেয়াল স্পর্শ করবে (১০০% স্ক্রিন থেকে নিজের সাইজ মাইনাস) */
+        transform: translateX(calc(100vw - 100%)); 
     }
 }
-
-
-
         /* 💡 (ঐচ্ছিক) মাউস রাখলে মারকুই থামানোর জন্য নিচের কোডটি যোগ করতে পারেন */
         .welcome-marquee-wrap:hover .welcome-marquee-text {
             animation-play-state: paused;
