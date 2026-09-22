@@ -210,18 +210,39 @@
         .welcome-banner .welcome-icon { display:inline-grid; place-items:center; width:52px; height:52px; margin-bottom:16px; border-radius:15px; background:#e8f5f8; font-size:27px; }
         .welcome-banner h2 { position:relative; z-index:1; font-size:27px; letter-spacing:-.5px; }
         .welcome-banner p { position:relative; z-index:1; max-width:760px; font-size:14px; }
-        .welcome-marquee-wrap { position:relative; left:50%; width:100vw; margin-left:-50vw; overflow:hidden; padding:6px 0; }
-        .welcome-marquee-text { display:inline-block; white-space:nowrap; font-size:40px; font-weight:800; letter-spacing:-0.5px; animation: welcomeMarquee 50s linear infinite; }
-        
-        /* 🔄 একমুখী লুপ অ্যানিমেশন (ডান থেকে বামে) */
-        @keyframes welcomeMarquee {
-            0% { 
-                transform: translateX(100vw); /* স্ক্রিনের একদম ডান দিক থেকে লেখা শুরু হবে */
-            }
-            100% { 
-                transform: translateX(-100%); /* লেখাটি সম্পূর্ণ বামে লুকিয়ে যাওয়ার পর আবার ডান থেকে আসবে */
-            }
-        }
+        .welcome-marquee-wrap { 
+    position: relative; 
+    left: 50%; 
+    width: 100vw; 
+    margin-left: -50vw; 
+    overflow: hidden; 
+    padding: 6px 0; 
+}
+
+.welcome-marquee-text { 
+    display: inline-block; 
+    white-space: nowrap; 
+    font-size: 40px; 
+    font-weight: 800; 
+    letter-spacing: -0.5px; 
+    
+    /* লেখাটি স্ক্রিনের একদম ডান পাশ থেকে শুরু করার জন্য padding-left */
+    padding-left: 100%; 
+    
+    /* ৫০ সেকেন্ড স্পীড */
+    animation: welcomeMarquee 50s linear infinite; 
+}
+
+/* 🔄 নিখুঁত একমুখী লুপ (কোনো বাড়তি লেট বা গ্যাপ হবে না) */
+@keyframes welcomeMarquee {
+    0% { 
+        transform: translate3d(0, 0, 0); 
+    }
+    100% { 
+        transform: translate3d(-100%, 0, 0); 
+    }
+}
+
 
         /* 💡 (ঐচ্ছিক) মাউস রাখলে মারকুই থামানোর জন্য নিচের কোডটি যোগ করতে পারেন */
         .welcome-marquee-wrap:hover .welcome-marquee-text {
