@@ -412,7 +412,7 @@
             <div class="status-strip">
                 <div class="status-text">
                     <div class="status-date" id="statusDate">—</div>
-                    
+                    <div class="status-hint">নিচের যেকোনো ক্যাটাগরি বেছে নিয়ে ডাটা দেখুন, আপলোড করুন বা সামারি দেখুন</div>
                 </div>
                 <div class="status-figures">
                     <div class="status-figure">
@@ -711,21 +711,42 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                     }
                 }
 
-                var PAGE_SIZE = 500;
+                // As pd_files grows, a large page (many rows x ~10KB of jsonb each) can hit
+                // Supabase's statement timeout and come back as a 500 error. Instead of
+                // silently giving up on the whole sync, shrink the page size and retry the
+                // same offset; only skip that range if even the smallest page still fails.
+                var PAGE_SIZE = 100;
+                var MIN_PAGE_SIZE = 10;
+                var pageSize = PAGE_SIZE;
                 var rows = [];
                 var from = 0;
+                var skippedRanges = 0;
                 while (true) {
-                    var q = supabaseClient.from("pd_files").select("*").order("base_id", { ascending: true }).order("chunk_index", { ascending: true }).range(from, from + PAGE_SIZE - 1);
+                    var q = supabaseClient.from("pd_files").select("*").order("base_id", { ascending: true }).order("chunk_index", { ascending: true }).range(from, from + pageSize - 1);
                     if (idsToFetch) q = q.in("base_id", idsToFetch);
                     var page = await q;
                     if (page.error) {
-                        console.warn("cloudPullAllFiles", page.error.message);
-                        break;
+                        console.warn("cloudPullAllFiles page error at offset " + from + " (page size " + pageSize + ")", page.error.message);
+                        if (pageSize > MIN_PAGE_SIZE) {
+                            pageSize = Math.max(MIN_PAGE_SIZE, Math.floor(pageSize / 2));
+                            continue; // retry the same offset with a smaller page
+                        }
+                        // Already at the smallest page size and still failing — skip this
+                        // small range rather than aborting the entire sync.
+                        skippedRanges++;
+                        from += pageSize;
+                        pageSize = PAGE_SIZE; // reset for the next range
+                        if (skippedRanges > 20) break; // avoid an infinite loop on persistent failure
+                        continue;
                     }
                     var pageRows = page.data || [];
                     rows = rows.concat(pageRows);
-                    if (pageRows.length < PAGE_SIZE) break;
-                    from += PAGE_SIZE;
+                    if (pageRows.length < pageSize) break;
+                    from += pageRows.length;
+                    if (pageSize < PAGE_SIZE) pageSize = Math.min(PAGE_SIZE, pageSize * 2); // recover gradually
+                }
+                if (skippedRanges > 0) {
+                    console.warn("cloudPullAllFiles: " + skippedRanges + " range(s) skipped after repeated timeouts");
                 }
                 // Group chunks belonging to the same original file back together
                 var groups = {};
