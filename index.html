@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="bn" translate="no" class="notranslate">
 <head>
@@ -1669,11 +1670,29 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             showStatus("সব ডাটা মুছে ফেলা হয়েছে", false);
         }
 
-        function renderTable(data) {
+        // Rendering all 800k+ rows into the DOM at once freezes the browser, so we
+        // page through them instead of hard-capping at a fixed row count. This keeps
+        // every row reachable (via Prev/Next) instead of silently hiding the rest.
+        var TABLE_PAGE_SIZE = 1000;
+        var tableRenderState = { data: [], page: 1 };
+
+        function renderTable(data, page) {
+            tableRenderState.data = data || [];
+
             if (!data || data.length === 0) {
                 document.getElementById("tableArea").innerHTML = '<div class="no-data">কোনো ডাটা পাওয়া যায়নি</div>';
                 return;
             }
+
+            var totalRows = data.length;
+            var totalPages = Math.max(1, Math.ceil(totalRows / TABLE_PAGE_SIZE));
+            page = page || 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            tableRenderState.page = page;
+
+            var start = (page - 1) * TABLE_PAGE_SIZE;
+            var end = Math.min(start + TABLE_PAGE_SIZE, totalRows);
 
             var html = "<table><thead><tr>";
             for (var h = 0; h < combinedHeaders.length; h++) {
@@ -1682,9 +1701,7 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             }
             html += "</tr></thead><tbody>";
 
-            // Show first 1500 rows for performance
-            var maxRows = 1500;
-            var displayData = data.slice(0, maxRows);
+            var displayData = data.slice(start, end);
             for (var r = 0; r < displayData.length; r++) {
                 var row = displayData[r];
                 html += "<tr>";
@@ -1697,11 +1714,23 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             }
             html += "</tbody></table>";
 
-            if (data.length > maxRows) {
-                html += '<div style="padding:12px; text-align:center; color:#e67e22; background:#fff3cd; font-size:13px;">⚠️ পারফরম্যান্সের জন্য প্রথম ' + maxRows + ' রো দেখানো হয়েছে (মোট ' + data.length.toLocaleString() + ' রো)। সার্চ দিয়ে নির্দিষ্ট ডাটা খুঁজুন।</div>';
+            if (totalPages > 1) {
+                html += '<div style="display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; background:#f4f6f8; flex-wrap:wrap;">';
+                html += '<button type="button" onclick="goToTablePage(' + (page - 1) + ')"' + (page <= 1 ? ' disabled' : '') + ' style="padding:6px 14px; border-radius:6px; border:1px solid var(--line); background:#fff; cursor:pointer;">◀ পূর্ববর্তী</button>';
+                html += '<span style="font-size:13px; color:var(--muted);">পাতা ' + page + ' / ' + totalPages + ' &nbsp; (রো ' + (start + 1).toLocaleString() + '–' + end.toLocaleString() + ' মোট ' + totalRows.toLocaleString() + ')</span>';
+                html += '<input type="number" id="tableJumpInput" min="1" max="' + totalPages + '" placeholder="পাতা নং" style="width:80px; padding:5px 8px; border-radius:6px; border:1px solid var(--line);">';
+                html += '<button type="button" onclick="var v=parseInt(document.getElementById(\'tableJumpInput\').value,10); if(v) goToTablePage(v);" style="padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:#fff; cursor:pointer;">যান</button>';
+                html += '<button type="button" onclick="goToTablePage(' + (page + 1) + ')"' + (page >= totalPages ? ' disabled' : '') + ' style="padding:6px 14px; border-radius:6px; border:1px solid var(--line); background:#fff; cursor:pointer;">পরবর্তী ▶</button>';
+                html += '</div>';
             }
 
             document.getElementById("tableArea").innerHTML = html;
+        }
+
+        function goToTablePage(p) {
+            renderTable(tableRenderState.data, p);
+            var area = document.getElementById("tableArea");
+            if (area && area.scrollIntoView) area.scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
         function findHeaderIndex(names) {
@@ -1738,10 +1767,12 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             var box = document.getElementById("dataFilterControls");
             if (!bar || !box) return;
 
-            // Field sets per category — add a category here to turn its filter bar on
+            // Field sets per category — add a category here to turn its filter bar on.
+            // "Yaer"/"Yaear" typos are tolerated because the source Excel files
+            // themselves misspell "Year" inconsistently across categories.
             var CATEGORY_FILTER_FIELDS = {
                 "Breakdown": [
-                    { key: "Year", labels: ["year", "yaear"] },
+                    { key: "Year", labels: ["year", "yaer", "yaear"] },
                     { key: "Month", labels: ["month"] },
                     { key: "Date", labels: ["date"] },
                     { key: "Shift", labels: ["shift"] },
@@ -1750,7 +1781,15 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                 ]
             };
 
-            var fields = CATEGORY_FILTER_FIELDS[currentCategory];
+            // Fallback used for every category that doesn't have its own custom list
+            // above — enables Year/Month/Date filtering everywhere those columns exist.
+            var GENERIC_FILTER_FIELDS = [
+                { key: "Year", labels: ["year", "yaer", "yaear"] },
+                { key: "Month", labels: ["month"] },
+                { key: "Date", labels: ["date"] }
+            ];
+
+            var fields = CATEGORY_FILTER_FIELDS[currentCategory] || GENERIC_FILTER_FIELDS;
             if (!fields) {
                 bar.style.display = "none";
                 box.innerHTML = "";
@@ -1772,40 +1811,92 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
                 return;
             }
 
-            // unique values per field
-            var options = {};
+            // Just record which column index backs each field here — the actual
+            // option lists are (re)built by refreshDependentFilterOptions() so that
+            // Date/Month/Year narrow each other down instead of always listing every
+            // value in the whole file.
+            var meta = {};
             for (var a = 0; a < available.length; a++) {
-                var set = {};
-                for (var r = 0; r < allCombinedData.length; r++) {
-                    var v = allCombinedData[r][available[a].idx];
-                    if (v !== null && v !== undefined && String(v).trim() !== "") set[String(v).trim()] = true;
-                }
-                var list = Object.keys(set);
-                if (available[a].key === "Year") list.sort(function(x,y){ return parseInt(x,10)-parseInt(y,10); });
-                else if (available[a].key === "Month" && typeof sortMonthList === "function") list = sortMonthList(list);
-                else list.sort(function(x,y){ return String(x).localeCompare(String(y), undefined, { numeric: true }); });
-                options[available[a].key] = { idx: available[a].idx, list: list };
+                meta[available[a].key] = { idx: available[a].idx, label: fieldLabelMap[available[a].key] || available[a].key };
             }
-
-            window._dataFilterMeta = options;
+            window._dataFilterMeta = meta;
 
             var html = "";
             for (var i = 0; i < fields.length; i++) {
                 var k = fields[i].key;
-                if (!options[k]) continue;
-                var kLabel = fieldLabelMap[k] || k;
-                html += '<select id="df_' + k + '" onchange="applyDataFilters()" style="padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-size:12px; min-width:110px;">';
-                html += '<option value="">সব ' + kLabel + '</option>';
-                for (var j = 0; j < options[k].list.length; j++) {
-                    html += '<option value="' + escapeHtml(options[k].list[j]) + '">' + escapeHtml(options[k].list[j]) + '</option>';
-                }
-                html += '</select>';
+                if (!meta[k]) continue;
+                html += '<select id="df_' + k + '" onchange="onDataFilterChange()" style="padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-size:12px; min-width:110px;"></select>';
             }
             html += '<button type="button" onclick="clearDataFilters()" style="padding:6px 10px; background:#7f8c8d; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px;">রিসেট</button>';
             html += '<span id="dataFilterCount" style="font-size:12px; color:var(--muted); margin-left:4px;"></span>';
 
             box.innerHTML = html;
             bar.style.display = "block";
+            refreshDependentFilterOptions();
+            applyDataFilters();
+        }
+
+        // Rows matching every active dropdown filter EXCEPT the one named in
+        // excludeKey — used to work out which values are still valid choices for
+        // that dropdown given what's already selected elsewhere.
+        function computeFilteredRowsExcluding(excludeKey) {
+            var meta = window._dataFilterMeta || {};
+            return allCombinedData.filter(function(row) {
+                for (var k in meta) {
+                    if (k === excludeKey) continue;
+                    var el = document.getElementById("df_" + k);
+                    if (!el) continue;
+                    var sel = el.value;
+                    if (!sel) continue;
+                    var cell = row[meta[k].idx];
+                    if (String(cell === null || cell === undefined ? "" : cell).trim() !== sel) return false;
+                }
+                return true;
+            });
+        }
+
+        // Rebuilds every dropdown's option list so Year/Month/Date (and any other
+        // configured field) stay consistent with each other — e.g. picking a Year
+        // and Month narrows the Date dropdown to only dates inside that month,
+        // instead of showing every date in the whole file.
+        function refreshDependentFilterOptions() {
+            var meta = window._dataFilterMeta || {};
+            for (var k in meta) {
+                var el = document.getElementById("df_" + k);
+                if (!el) continue;
+                var currentVal = el.value;
+
+                var subset = computeFilteredRowsExcluding(k);
+                var set = {};
+                for (var r = 0; r < subset.length; r++) {
+                    var v = subset[r][meta[k].idx];
+                    if (v !== null && v !== undefined && String(v).trim() !== "") set[String(v).trim()] = true;
+                }
+                var list = Object.keys(set);
+                if (k === "Year") list.sort(function(x, y) { return parseInt(x, 10) - parseInt(y, 10); });
+                else if (k === "Month" && typeof sortMonthList === "function") list = sortMonthList(list);
+                else list.sort(function(x, y) { return String(x).localeCompare(String(y), undefined, { numeric: true }); });
+
+                var html = '<option value="">সব ' + escapeHtml(meta[k].label) + '</option>';
+                for (var j = 0; j < list.length; j++) {
+                    html += '<option value="' + escapeHtml(list[j]) + '">' + escapeHtml(list[j]) + '</option>';
+                }
+                el.innerHTML = html;
+
+                // Keep the user's current selection if it's still a valid option;
+                // otherwise clear it rather than silently filtering on a stale value.
+                if (currentVal && list.indexOf(currentVal) >= 0) {
+                    el.value = currentVal;
+                } else {
+                    el.value = "";
+                }
+            }
+        }
+
+        // Bound to each filter dropdown's onchange: refresh what the OTHER dropdowns
+        // offer (so they stay in sync with the new selection), then re-filter the table.
+        function onDataFilterChange() {
+            refreshDependentFilterOptions();
             applyDataFilters();
         }
 
@@ -1819,6 +1910,7 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             if (s) s.value = "";
             var fs = document.getElementById("searchFieldSelect");
             if (fs) fs.value = "";
+            refreshDependentFilterOptions();
             applyDataFilters();
         }
 
