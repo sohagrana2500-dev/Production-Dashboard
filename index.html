@@ -333,7 +333,114 @@
             .header-actions button { flex: 1; min-width: 100px; }
             .status-strip { flex-direction: column; align-items: flex-start; }
         }
-    </style>
+    
+        /* ================= 3D THEME (background, buttons, login) ================= */
+        body {
+            background-color:#d9e6f0;
+            background-image:
+                radial-gradient(1000px 520px at 94% -8%, rgba(244,163,64,.20), transparent 62%),
+                radial-gradient(1000px 560px at -6% 106%, rgba(34,124,157,.25), transparent 60%),
+                linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,0) 45%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='99'%3E%3Cpolygon points='28,0 56,16.5 28,33 0,16.5' fill='rgba%28255,255,255,.45%29'/%3E%3Cpolygon points='0,16.5 28,33 28,66 0,49.5' fill='rgba%2817,36,62,.04%29'/%3E%3Cpolygon points='56,16.5 28,33 28,66 56,49.5' fill='rgba%2817,36,62,.10%29'/%3E%3Cpolygon points='28,0 56,16.5 56,49.5 28,66 0,49.5 0,16.5' fill='none' stroke='rgba%2817,36,62,.12%29' stroke-width='1'/%3E%3Cpolygon points='0,49.5 28,66 0,82.5 -28,66' fill='rgba%28255,255,255,.45%29'/%3E%3Cpolygon points='-28,66 0,82.5 0,115.5 -28,99' fill='rgba%2817,36,62,.04%29'/%3E%3Cpolygon points='28,66 0,82.5 0,115.5 28,99' fill='rgba%2817,36,62,.10%29'/%3E%3Cpolygon points='0,49.5 28,66 28,99 0,115.5 -28,99 -28,66' fill='none' stroke='rgba%2817,36,62,.12%29' stroke-width='1'/%3E%3Cpolygon points='56,49.5 84,66 56,82.5 28,66' fill='rgba%28255,255,255,.45%29'/%3E%3Cpolygon points='28,66 56,82.5 56,115.5 28,99' fill='rgba%2817,36,62,.04%29'/%3E%3Cpolygon points='84,66 56,82.5 56,115.5 84,99' fill='rgba%2817,36,62,.10%29'/%3E%3Cpolygon points='56,49.5 84,66 84,99 56,115.5 28,99 28,66' fill='none' stroke='rgba%2817,36,62,.12%29' stroke-width='1'/%3E%3Cpolygon points='0,-49.5 28,-33 0,-16.5 -28,-33' fill='rgba%28255,255,255,.45%29'/%3E%3Cpolygon points='-28,-33 0,-16.5 0,16.5 -28,0' fill='rgba%2817,36,62,.04%29'/%3E%3Cpolygon points='28,-33 0,-16.5 0,16.5 28,0' fill='rgba%2817,36,62,.10%29'/%3E%3Cpolygon points='0,-49.5 28,-33 28,0 0,16.5 -28,0 -28,-33' fill='none' stroke='rgba%2817,36,62,.12%29' stroke-width='1'/%3E%3Cpolygon points='56,-49.5 84,-33 56,-16.5 28,-33' fill='rgba%28255,255,255,.45%29'/%3E%3Cpolygon points='28,-33 56,-16.5 56,16.5 28,0' fill='rgba%2817,36,62,.04%29'/%3E%3Cpolygon points='84,-33 56,-16.5 56,16.5 84,0' fill='rgba%2817,36,62,.10%29'/%3E%3Cpolygon points='56,-49.5 84,-33 84,0 56,16.5 28,0 28,-33' fill='none' stroke='rgba%2817,36,62,.12%29' stroke-width='1'/%3E%3C/svg%3E");
+            background-size:auto,auto,auto,56px 99px;
+            background-attachment:fixed;
+        }
+
+        /* বাটন: উঁচু ব্লক, চাপলে বসে যায় (যেকোনো রঙের ওপর কাজ করে) */
+        .controls button, .file-btn, .back-btn, .danger-btn, .header-actions button, .login-submit, .backup-btn {
+            border-radius:11px !important;
+            background-image:linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0) 52%, rgba(0,0,0,.14)) !important;
+            box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 4px 0 rgba(0,0,0,.34), 0 10px 16px -4px rgba(6,20,40,.42);
+            text-shadow:0 1px 0 rgba(0,0,0,.28);
+            transform:translateY(0);
+            transition:transform .08s, box-shadow .08s, filter .15s !important;
+        }
+        .controls button:hover, .file-btn:hover, .back-btn:hover, .danger-btn:hover, .header-actions button:hover, .login-submit:hover, .backup-btn:hover {
+            filter:brightness(1.08); transform:translateY(-1px);
+            box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 5px 0 rgba(0,0,0,.34), 0 14px 20px -6px rgba(6,20,40,.5);
+        }
+        .controls button:active, .file-btn:active, .back-btn:active, .danger-btn:active, .header-actions button:active, .login-submit:active, .backup-btn:active {
+            transform:translateY(4px) scale(1);
+            box-shadow:0 1px 0 rgba(255,255,255,.22) inset, 0 0 0 rgba(0,0,0,.34), 0 2px 4px -2px rgba(6,20,40,.5);
+        }
+        .controls button:disabled, .login-submit:disabled { box-shadow:none; transform:none; filter:grayscale(.4) opacity(.75); cursor:not-allowed; }
+        .login-submit { font-size:15.5px; letter-spacing:.3px; }
+
+        /* ক্যাটাগরি কার্ড: ভাসমান ব্লক */
+        .category-card { border-radius:14px; border:1px solid rgba(255,255,255,.9); background:linear-gradient(180deg,#fff,#F4F8FB);
+            box-shadow:0 1px 0 #fff inset, 0 4px 0 #C5D6E2, 0 12px 18px -10px rgba(16,47,72,.35);
+            transition:transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s; }
+        .category-card:hover { transform:perspective(700px) translateY(-4px) rotateX(3deg);
+            box-shadow:0 1px 0 #fff inset, 0 6px 0 #B4C9D8, 0 22px 28px -12px rgba(16,47,72,.45); }
+        .category-card:active { transform:translateY(2px); box-shadow:0 1px 0 #fff inset, 0 1px 0 #C5D6E2; }
+
+        /* লগইন: ভাসমান 3D কার্ড */
+        .login-container {
+            perspective:1100px; overflow:hidden;
+            background-color:#0c1420;
+            background-image:
+                radial-gradient(700px 420px at 16% 12%, rgba(244,163,64,.28), transparent 60%),
+                radial-gradient(900px 560px at 88% 92%, rgba(34,124,157,.42), transparent 60%),
+                linear-gradient(160deg, rgba(12,20,32,.88), rgba(17,36,62,.94) 65%, rgba(27,77,114,.88)),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='99'%3E%3Cpolygon points='28,0 56,16.5 28,33 0,16.5' fill='rgba%28255,255,255,.10%29'/%3E%3Cpolygon points='0,16.5 28,33 28,66 0,49.5' fill='rgba%28255,255,255,.02%29'/%3E%3Cpolygon points='56,16.5 28,33 28,66 56,49.5' fill='rgba%280,0,0,.18%29'/%3E%3Cpolygon points='28,0 56,16.5 56,49.5 28,66 0,49.5 0,16.5' fill='none' stroke='rgba%28255,255,255,.07%29' stroke-width='1'/%3E%3Cpolygon points='0,49.5 28,66 0,82.5 -28,66' fill='rgba%28255,255,255,.10%29'/%3E%3Cpolygon points='-28,66 0,82.5 0,115.5 -28,99' fill='rgba%28255,255,255,.02%29'/%3E%3Cpolygon points='28,66 0,82.5 0,115.5 28,99' fill='rgba%280,0,0,.18%29'/%3E%3Cpolygon points='0,49.5 28,66 28,99 0,115.5 -28,99 -28,66' fill='none' stroke='rgba%28255,255,255,.07%29' stroke-width='1'/%3E%3Cpolygon points='56,49.5 84,66 56,82.5 28,66' fill='rgba%28255,255,255,.10%29'/%3E%3Cpolygon points='28,66 56,82.5 56,115.5 28,99' fill='rgba%28255,255,255,.02%29'/%3E%3Cpolygon points='84,66 56,82.5 56,115.5 84,99' fill='rgba%280,0,0,.18%29'/%3E%3Cpolygon points='56,49.5 84,66 84,99 56,115.5 28,99 28,66' fill='none' stroke='rgba%28255,255,255,.07%29' stroke-width='1'/%3E%3Cpolygon points='0,-49.5 28,-33 0,-16.5 -28,-33' fill='rgba%28255,255,255,.10%29'/%3E%3Cpolygon points='-28,-33 0,-16.5 0,16.5 -28,0' fill='rgba%28255,255,255,.02%29'/%3E%3Cpolygon points='28,-33 0,-16.5 0,16.5 28,0' fill='rgba%280,0,0,.18%29'/%3E%3Cpolygon points='0,-49.5 28,-33 28,0 0,16.5 -28,0 -28,-33' fill='none' stroke='rgba%28255,255,255,.07%29' stroke-width='1'/%3E%3Cpolygon points='56,-49.5 84,-33 56,-16.5 28,-33' fill='rgba%28255,255,255,.10%29'/%3E%3Cpolygon points='28,-33 56,-16.5 56,16.5 28,0' fill='rgba%28255,255,255,.02%29'/%3E%3Cpolygon points='84,-33 56,-16.5 56,16.5 84,0' fill='rgba%280,0,0,.18%29'/%3E%3Cpolygon points='56,-49.5 84,-33 84,0 56,16.5 28,0 28,-33' fill='none' stroke='rgba%28255,255,255,.07%29' stroke-width='1'/%3E%3C/svg%3E");
+            background-size:auto,auto,auto,56px 99px;
+            animation:bgDrift 60s linear infinite;
+        }
+        @keyframes bgDrift { from { background-position:0 0,0 0,0 0,0 0 } to { background-position:0 0,0 0,0 0,560px 990px } }
+        .login-container::before, .login-container::after { content:""; position:absolute; border-radius:28px; pointer-events:none;
+            background:linear-gradient(145deg,rgba(255,255,255,.20),rgba(255,255,255,.02));
+            box-shadow:0 30px 50px -20px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.32); animation:floaty 7s ease-in-out infinite; }
+        .login-container::before { width:180px; height:180px; left:9%; top:14%; transform:rotate(18deg); }
+        .login-container::after { width:120px; height:120px; right:12%; bottom:14%; transform:rotate(-14deg); animation-delay:-3s; }
+        @keyframes floaty { 0%,100% { translate:0 0 } 50% { translate:0 -18px } }
+        .login-box { z-index:1; border:1px solid rgba(255,255,255,.95); border-left:1px solid rgba(255,255,255,.95); border-radius:22px;
+            background:linear-gradient(180deg,#fff 0%,#F1F6FA 100%); transform-style:preserve-3d; transform:rotateX(4deg) rotateY(-5deg);
+            box-shadow:inset 6px 0 0 var(--amber), 0 1px 0 #fff inset, 0 10px 0 -2px #BFD1DE, 0 42px 70px -18px rgba(0,0,0,.7);
+            transition:transform .5s cubic-bezier(.2,.8,.2,1); }
+        .login-box:hover { transform:rotateX(0) rotateY(0) translateY(-4px); }
+        .login-mark { border-radius:13px; transform:translateZ(34px);
+            background:linear-gradient(180deg,#2E7AA6,var(--ink-2) 60%,#12374F);
+            box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 5px 0 #0B2536, 0 14px 20px -6px rgba(0,0,0,.45); }
+        .login-box h1 { text-shadow:0 2px 0 #fff, 0 4px 8px rgba(16,47,72,.2); }
+        .login-box input { border-radius:11px; background:#F3F7FA; border-color:#D3E0E9;
+            box-shadow:inset 0 2px 5px rgba(16,47,72,.13), 0 1px 0 #fff; transition:box-shadow .15s, border-color .15s, transform .15s; }
+        .login-box input:focus { background:#fff; transform:translateY(-1px);
+            box-shadow:inset 0 2px 4px rgba(16,47,72,.08), 0 0 0 4px rgba(34,124,157,.18), 0 8px 14px -8px rgba(34,124,157,.5); }
+
+        @media (prefers-reduced-motion:reduce) { .login-container { animation:none } .login-container::before, .login-container::after { animation:none } .category-card, .login-box { transition:none } }
+        @media (max-width:700px) { .login-box { transform:none } .login-container::before, .login-container::after { display:none } .category-card:hover { transform:none } }
+        @media print { body { background:#fff !important } .controls button, .file-btn, .back-btn, .danger-btn, .header-actions button, .backup-btn, .category-card { box-shadow:none !important; background-image:none !important } }
+
+        /* ================= DARK NAVY HEX (গাঢ় নেভি + হানিকম্ব ডিজাইন) ================= */
+        body {
+            background-color:#071431;
+            background-image:
+                radial-gradient(900px 520px at 6% -6%, rgba(40,110,230,.38), transparent 62%),
+                radial-gradient(1000px 600px at 100% 108%, rgba(20,70,170,.45), transparent 60%),
+                radial-gradient(600px 340px at 96% 4%, rgba(244,163,64,.12), transparent 62%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97'%3E%3Cpolygon points='0,-32.33 28,-16.16 28,16.16 0,32.33 -28,16.16 -28,-16.16' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='56,-32.33 84,-16.16 84,16.16 56,32.33 28,16.16 28,-16.16' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='28,16.17 56,32.34 56,64.66 28,80.83 0,64.66 0,32.34' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='0,64.67 28,80.84 28,113.16 0,129.33 -28,113.16 -28,80.84' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='56,64.67 84,80.84 84,113.16 56,129.33 28,113.16 28,80.84' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='28,20.70 52.08,34.60 52.08,62.40 28,76.30 3.92,62.40 3.92,34.60' fill='rgba%2870,120,230,.07%29' stroke='rgba%28160,200,255,.10%29' stroke-width='1'/%3E%3Cpolygon points='0,-27.80 24.08,-13.90 24.08,13.90 0,27.80 -24.08,13.90 -24.08,-13.90' fill='rgba%2870,120,230,.07%29' stroke='rgba%28160,200,255,.10%29' stroke-width='1'/%3E%3Cpolygon points='56,-27.80 80.08,-13.90 80.08,13.90 56,27.80 31.92,13.90 31.92,-13.90' fill='rgba%2870,120,230,.07%29' stroke='rgba%28160,200,255,.10%29' stroke-width='1'/%3E%3C/svg%3E");
+            background-size:auto,auto,auto,56px 97px;
+            background-attachment:fixed;
+        }
+        .header, .ticker-card, .status-strip, .data-section, .summary-section, .chart-section, .category-card {
+            border-color:rgba(160,200,255,.35);
+            box-shadow:0 1px 0 #fff inset, 0 4px 0 rgba(5,15,40,.45), 0 18px 30px -12px rgba(0,0,0,.6);
+        }
+        .category-card:hover { box-shadow:0 1px 0 #fff inset, 0 6px 0 rgba(5,15,40,.5), 0 26px 36px -12px rgba(0,0,0,.7); }
+        .login-container {
+            background-color:#050f26;
+            background-image:
+                radial-gradient(700px 420px at 14% 10%, rgba(40,110,230,.42), transparent 60%),
+                radial-gradient(900px 560px at 90% 92%, rgba(20,70,170,.50), transparent 60%),
+                linear-gradient(160deg, rgba(5,15,38,.90), rgba(9,26,64,.94) 65%, rgba(14,42,98,.90)),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97'%3E%3Cpolygon points='0,-32.33 28,-16.16 28,16.16 0,32.33 -28,16.16 -28,-16.16' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='56,-32.33 84,-16.16 84,16.16 56,32.33 28,16.16 28,-16.16' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='28,16.17 56,32.34 56,64.66 28,80.83 0,64.66 0,32.34' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='0,64.67 28,80.84 28,113.16 0,129.33 -28,113.16 -28,80.84' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='56,64.67 84,80.84 84,113.16 56,129.33 28,113.16 28,80.84' fill='none' stroke='rgba%28120,170,255,.16%29' stroke-width='1.2'/%3E%3Cpolygon points='28,20.70 52.08,34.60 52.08,62.40 28,76.30 3.92,62.40 3.92,34.60' fill='rgba%2870,120,230,.07%29' stroke='rgba%28160,200,255,.10%29' stroke-width='1'/%3E%3Cpolygon points='0,-27.80 24.08,-13.90 24.08,13.90 0,27.80 -24.08,13.90 -24.08,-13.90' fill='rgba%2870,120,230,.07%29' stroke='rgba%28160,200,255,.10%29' stroke-width='1'/%3E%3Cpolygon points='56,-27.80 80.08,-13.90 80.08,13.90 56,27.80 31.92,13.90 31.92,-13.90' fill='rgba%2870,120,230,.07%29' stroke='rgba%28160,200,255,.10%29' stroke-width='1'/%3E%3C/svg%3E");
+            background-size:auto,auto,auto,56px 97px;
+            animation:hexDrift 70s linear infinite;
+        }
+        @keyframes hexDrift { from { background-position:0 0,0 0,0 0,0 0 } to { background-position:0 0,0 0,0 0,560px 970px } }
+        @media (prefers-reduced-motion:reduce) { .login-container { animation:none } }
+        @media print { body { background:#fff !important } .header, .ticker-card, .status-strip, .data-section, .summary-section, .chart-section { box-shadow:none !important } }
+</style>
 </head>
 <body>
 
