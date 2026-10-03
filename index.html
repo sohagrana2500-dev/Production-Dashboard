@@ -564,6 +564,8 @@
                 <div id="fileNamesShort" style="font-size:12px; color:#555;"></div>
             </div>
 
+            <div id="fileListBox" style="display:none; margin-bottom:14px; background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:10px 14px;"></div>
+
             <div id="batchSummaryBox" style="display:none; background:#eef4ff; border:1.5px solid #93b7f5; border-radius:10px; padding:14px 18px; margin-bottom:14px; display:flex; flex-wrap:wrap; align-items:center; gap:24px;">
                 <div style="font-size:14px; font-weight:700; color:#1e3a8a;">
                     <span aria-hidden="true">🔎</span> BATCH NO: <span id="bsBatchNo" style="background:#fff; border:1.5px solid #93b7f5; border-radius:6px; padding:4px 10px; margin-left:4px;"></span>
@@ -1616,6 +1618,7 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             var fileNames = Object.keys(loadedFiles);
             if (fileNames.length === 0) {
                 document.getElementById("infoBar").style.display = "none";
+                renderFileList();
                 return;
             }
             document.getElementById("infoBar").style.display = "flex";
@@ -1623,6 +1626,82 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             document.getElementById("totalFilesText").innerText = fileNames.length;
             document.getElementById("colsText").innerText = combinedHeaders.length;
             document.getElementById("fileNamesShort").innerText = fileNames.join("  |  ");
+            renderFileList();
+        }
+
+        // Shows every saved file for this category with its own ✕ button so a
+        // single file (e.g. just the current year) can be removed without
+        // touching any other year/file — "সব মুছে ফেলুন" is no longer the only option.
+        var _fileListNames = [];
+        function renderFileList() {
+            var box = document.getElementById("fileListBox");
+            if (!box) return;
+            var fileNames = Object.keys(loadedFiles).sort();
+            _fileListNames = fileNames;
+            if (fileNames.length === 0) {
+                box.innerHTML = "";
+                box.style.display = "none";
+                return;
+            }
+            var isAdmin = currentUser && currentUser.role === "admin";
+            var html = '<div style="font-size:12px; font-weight:600; color:var(--ink-2); margin-bottom:8px;">📁 সেভ করা ফাইলসমূহ (' + fileNames.length + 'টি) — একটি ফাইল যোগ/বদলাতে সেম নামের ফাইল আবার আপলোড করলেই শুধু সেটি রিপ্লেস হয়ে যাবে</div>';
+            html += '<div style="display:flex; flex-wrap:wrap; gap:6px;">';
+            for (var i = 0; i < fileNames.length; i++) {
+                var fn = fileNames[i];
+                var rowCount = ((loadedFiles[fn] || {}).data || []).length;
+                html += '<span style="display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:12px;">';
+                html += escapeHtml(fn) + ' <span style="color:var(--muted);">(' + rowCount.toLocaleString() + ' রো)</span>';
+                if (isAdmin) {
+                    html += ' <button type="button" onclick="deleteOneFileByIndex(' + i + ')" title="শুধু এই ফাইলটি মুছুন, বাকিগুলো অক্ষত থাকবে" style="border:none; background:#fde8e8; color:#c0392b; border-radius:4px; padding:2px 6px; cursor:pointer; font-size:11px;">✕</button>';
+                }
+                html += '</span>';
+            }
+            html += '</div>';
+            box.innerHTML = html;
+            box.style.display = "block";
+        }
+
+        function deleteOneFileByIndex(i) {
+            var fn = _fileListNames[i];
+            if (fn !== undefined) deleteOneFile(fn);
+        }
+
+        // Deletes a single uploaded file (local + cloud) without touching any
+        // other file in the category — e.g. remove just "...-2025.xlsx" while
+        // "...-2018.xlsx" through "...-2024.xlsx" stay exactly as they are.
+        async function deleteOneFile(fileName) {
+            if (!currentUser || currentUser.role !== "admin") { alert("শুধু Admin ফাইল মুছতে পারে।"); return; }
+            if (!currentCategory || !loadedFiles[fileName]) return;
+            if (!confirm('\u0027' + fileName + '\u0027 ফাইলটি মুছে ফেলতে চান? বাকি ফাইলগুলো অক্ষত থাকবে।')) return;
+
+            try {
+                await deleteFileFromDB(currentCategory, fileName);
+            } catch (e) {
+                showStatus("মুছতে সমস্যা: " + e.message, true);
+                return;
+            }
+
+            delete loadedFiles[fileName];
+            var remaining = Object.keys(loadedFiles);
+
+            if (remaining.length === 0) {
+                allCombinedData = [];
+                combinedHeaders = [];
+                document.getElementById("infoBar").style.display = "none";
+                var badge = document.getElementById("savedBadge");
+                if (badge) badge.style.display = "none";
+                document.getElementById("tableArea").innerHTML = '<div class="no-data">সব ডাটা মুছে ফেলা হয়েছে। নতুন ফাইল আপলোড করুন।</div>';
+                document.getElementById("hintText").style.display = "block";
+                renderFileList();
+            } else {
+                buildCombinedData();
+                updateInfoBar();
+                renderTable(allCombinedData);
+                populateSearchFieldSelect();
+                buildDataFilterBar();
+            }
+
+            showStatus('"' + fileName + '" ফাইলটি মুছে ফেলা হয়েছে, বাকি ফাইলগুলো অক্ষত আছে।', false);
         }
 
         async function openCategory(cat) {
@@ -1638,6 +1717,7 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             document.getElementById("categoryTitle").innerHTML = cat + ' Data <span class="saved-badge" id="savedBadge" style="display:none;">✓ সেভ আছে</span>';
             document.getElementById("tableArea").innerHTML = '<div class="no-data">লোড হচ্ছে...</div>';
             document.getElementById("infoBar").style.display = "none";
+            var _flb = document.getElementById("fileListBox"); if (_flb) { _flb.style.display = "none"; _flb.innerHTML = ""; }
             document.getElementById("searchInput").value = "";
             var _sfs = document.getElementById("searchFieldSelect"); if (_sfs) _sfs.innerHTML = '<option value="">সব কলাম</option>';
             var _bsb = document.getElementById("batchSummaryBox"); if (_bsb) _bsb.style.display = "none";
@@ -1774,6 +1854,7 @@ const CATEGORIES = ["CW", "Breakdown", "Efficiency", "FLT", "HW", "Supervisor", 
             if (badge) badge.style.display = "none";
             document.getElementById("tableArea").innerHTML = '<div class="no-data">সব ডাটা মুছে ফেলা হয়েছে। নতুন ফাইল আপলোড করুন।</div>';
             document.getElementById("hintText").style.display = "block";
+            renderFileList();
             showStatus("সব ডাটা মুছে ফেলা হয়েছে", false);
         }
 
