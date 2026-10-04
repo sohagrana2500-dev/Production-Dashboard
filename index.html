@@ -166,7 +166,7 @@ h2.t{font-size:22px;margin:22px 0 4px}p.d{color:var(--mut);font-size:14px}
             <div id="thm-list" class="thm-list"></div>
             <div class="thm-row"><span>নিজের ছবির ওপর অন্ধকার ওভারলে</span><input type="range" id="thm-ov" min="0" max="85" value="45"></div>
             <div class="btns"><label class="btn sm" for="thm-file" style="cursor:pointer">➕ নিজের ছবি যোগ করুন</label><input type="file" id="thm-file" accept="image/*" hidden><button class="btn sm" id="thm-reset">↩ ডিফল্ট থিম</button></div>
-            <div class="info" id="thm-msg" style="margin-top:10px">থিম এই ব্রাউজারে সংরক্ষিত থাকে (সর্বোচ্চ ৫টি নিজের ছবি)।</div></div>
+            <div class="info" id="thm-msg" style="margin-top:10px">থিম Supabase-এ (ক্লাউডে) সংরক্ষিত থাকে — সব ব্রাউজার ও ডিভাইসে একই দেখাবে। পরিবর্তন সংরক্ষণ করতে Sticker Stock মডিউলে Admin হিসেবে লগইন থাকা আবশ্যক। (সর্বোচ্চ ৫টি নিজের ছবি)</div></div>
         </div>
       </div>
     </section>
@@ -311,7 +311,7 @@ $('#bsave').onclick=function(){
   if(!h){$('#bmsg').textContent='⚠ ব্র্যান্ডিং সংরক্ষণ করতে Sticker Stock মডিউলে Admin হিসেবে লগইন থাকা আবশ্যক';return}
   var name=$('#bn-in').value.trim();var logo=pendingLogo||B.logo||'';
   $('#bmsg').textContent='সংরক্ষণ হচ্ছে…';
-  h.w.sbClient.rpc('ss_set_settings',{p_token:h.tok,p_app_name:name,p_logo_image:logo}).then(function(res){
+  h.w.sbClient.rpc('sr_set_brand',{p_token:h.tok,p_app_name:name,p_logo_image:logo}).then(function(res){
     if(res&&res.error){$('#bmsg').textContent='⚠ সংরক্ষণ ব্যর্থ: '+res.error.message;return}
     B.name=name;B.logo=logo;pendingLogo=null;applyBrand();$('#bmsg').textContent='✔ সংরক্ষিত হয়েছে (Supabase)'
   }).catch(function(){$('#bmsg').textContent='⚠ সংরক্ষণ ব্যর্থ — ইন্টারনেট/সার্ভার সমস্যা'});
@@ -320,7 +320,7 @@ $('#breset').onclick=function(){
   var h=brandAdminHandle();
   if(!h){$('#bmsg').textContent='⚠ ডিফল্টে ফেরাতে Sticker Stock মডিউলে Admin হিসেবে লগইন থাকা আবশ্যক';return}
   $('#bmsg').textContent='সংরক্ষণ হচ্ছে…';
-  h.w.sbClient.rpc('ss_set_settings',{p_token:h.tok,p_app_name:'',p_logo_image:''}).then(function(res){
+  h.w.sbClient.rpc('sr_set_brand',{p_token:h.tok,p_app_name:'',p_logo_image:''}).then(function(res){
     if(res&&res.error){$('#bmsg').textContent='⚠ ব্যর্থ: '+res.error.message;return}
     B={name:'',logo:''};pendingLogo=null;$('#bn-in').value='';$('#bl-in').value='';applyBrand();$('#bmsg').textContent='✔ ডিফল্টে ফেরানো হয়েছে'
   }).catch(function(){$('#bmsg').textContent='⚠ ব্যর্থ — ইন্টারনেট/সার্ভার সমস্যা'});
@@ -359,6 +359,12 @@ var PR=[['circuit','সার্কিট টেক','linear-gradient(135deg,#02
 var bx=document.createElement('div');bx.id='bgx';document.body.insertBefore(bx,document.body.firstChild);
 function bst(){var s={sel:'circuit',ov:45,imgs:[]};try{var j=JSON.parse(localStorage.getItem('sr_bg'));if(j)s=j}catch(e){}return s}
 function bsave(s){try{localStorage.setItem('sr_bg',JSON.stringify(s));return true}catch(e){return false}}
+var bdeb=null;
+function bpush(){clearTimeout(bdeb);bdeb=setTimeout(function(){var m=document.getElementById('thm-msg'),h=brandAdminHandle();
+ if(!h){m.textContent='⚠ ক্লাউডে (সব ডিভাইসে) সংরক্ষণ করতে Sticker Stock মডিউলে Admin হিসেবে লগইন থাকা আবশ্যক — এখন শুধু এই ব্রাউজারে সংরক্ষিত';return}
+ m.textContent='ক্লাউডে সংরক্ষণ হচ্ছে…';
+ h.w.sbClient.rpc('sr_set_theme',{p_token:h.tok,p_data:bst()}).then(function(r){m.textContent=(r&&r.error)?'⚠ ক্লাউডে সংরক্ষণ ব্যর্থ: '+r.error.message:'✔ সংরক্ষিত হয়েছে (Supabase) — সব ব্রাউজারে একই দেখাবে'}).catch(function(){m.textContent='⚠ ব্যর্থ — ইন্টারনেট/সার্ভার সমস্যা'})},500)}
+function bload(){if(!sbPublic)return;sbPublic.rpc('sr_get_theme').then(function(r){var d=r&&!r.error&&r.data;if(d&&d.sel){d.imgs=d.imgs||[];if(d.ov==null)d.ov=45;bsave(d);bapply();brender()}}).catch(function(){})}
 function bapply(){var s=bst(),c=document.getElementById('bgc'),p,im;
  if(s.sel==='circuit'){if(c)c.style.display='';window.__bgOn=true;bx.style.display='none';return}
  if(c)c.style.display='none';window.__bgOn=false;bx.style.display='block';bx.className='';
@@ -372,16 +378,16 @@ function brender(){var s=bst(),h='',l=document.getElementById('thm-list');if(!l)
  s.imgs.forEach(function(m){h+='<div class="thm'+(s.sel===m.id?' on':'')+'" data-id="'+m.id+'" style="background-image:url('+m.d+')"><span>'+m.n+'</span><b class="x" data-del="'+m.id+'">✕</b></div>'});
  l.innerHTML=h;document.getElementById('thm-ov').value=s.ov}
 document.getElementById('thm-list').addEventListener('click',function(e){var s=bst(),d=e.target.getAttribute('data-del'),t=e.target.closest('.thm');
- if(d){s.imgs=s.imgs.filter(function(m){return m.id!==d});if(s.sel===d)s.sel='circuit';bsave(s)}else if(t){s.sel=t.getAttribute('data-id');bsave(s)}else return;bapply();brender()});
-document.getElementById('thm-ov').addEventListener('input',function(){var s=bst();s.ov=+this.value;bsave(s);bapply()});
-document.getElementById('thm-reset').onclick=function(){var s=bst();s.sel='circuit';bsave(s);bapply();brender();document.getElementById('thm-msg').textContent='✔ ডিফল্ট থিম (সার্কিট টেক) চালু হয়েছে'};
+ if(d){s.imgs=s.imgs.filter(function(m){return m.id!==d});if(s.sel===d)s.sel='circuit';bsave(s)}else if(t){s.sel=t.getAttribute('data-id');bsave(s)}else return;bapply();brender();bpush()});
+document.getElementById('thm-ov').addEventListener('input',function(){var s=bst();s.ov=+this.value;bsave(s);bapply();bpush()});
+document.getElementById('thm-reset').onclick=function(){var s=bst();s.sel='circuit';bsave(s);bapply();brender();bpush()};
 document.getElementById('thm-file').addEventListener('change',function(){var f=this.files[0],inp=this,msg=document.getElementById('thm-msg');if(!f)return;
  var s=bst();if(s.imgs.length>=5){msg.textContent='⚠ সর্বোচ্চ ৫টি নিজের থিম রাখা যায়, আগে একটি মুছুন';inp.value='';return}
- var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,1920/im.width),cv=document.createElement('canvas');cv.width=im.width*k;cv.height=im.height*k;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
-  var id='c'+Date.now();s.imgs.push({id:id,n:f.name.replace(/\.[^.]+$/,'').slice(0,18),d:cv.toDataURL('image/jpeg',.8)});s.sel=id;
-  if(!bsave(s)){s.imgs.pop();s.sel='circuit';msg.textContent='⚠ সংরক্ষণের জায়গা নেই, পুরনো থিম মুছে আবার চেষ্টা করুন'}else msg.textContent='✔ নতুন থিম যোগ হয়েছে ও চালু হয়েছে';
+ var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,1600/im.width),cv=document.createElement('canvas');cv.width=im.width*k;cv.height=im.height*k;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+  var id='c'+Date.now();s.imgs.push({id:id,n:f.name.replace(/\.[^.]+$/,'').slice(0,18),d:cv.toDataURL('image/jpeg',.72)});s.sel=id;
+  if(!bsave(s)){s.imgs.pop();s.sel='circuit';msg.textContent='⚠ সংরক্ষণের জায়গা নেই, পুরনো থিম মুছে আবার চেষ্টা করুন'}else bpush();
   bapply();brender();inp.value=''};im.onerror=function(){msg.textContent='⚠ ছবিটি পড়া যায়নি'};im.src=r.result};r.readAsDataURL(f)});
-bapply();brender();
+bapply();brender();bload();
 })();
 </script>
 </body>
