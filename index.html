@@ -331,7 +331,7 @@ $$('[data-pc]').forEach(function(b){b.onclick=function(){go('prod');var w=F.prod
   try{if(f==='restore')w.document.getElementById('restoreInput').click();else w[f]()}catch(e){alert('এই কাজটি এখন করা যাচ্ছে না — আগে Production মডিউলে লগইন করুন।')}}});
 function fillInfo(u,r){var t=function(ok){return ok?'<b style="color:#22c55e">● লগইন সম্পন্ন</b>':'<b style="color:#f59e0b">● আলাদা লগইন প্রয়োজন</b>'};
   $('#sysinfo').innerHTML='ব্যবহারকারী: <b>'+u.replace(/</g,'&lt;')+'</b><br>Production: '+t(r[0])+'<br>Sticker Stock: '+t(r[1])+'<br>থিম: <b>'+(root.dataset.theme==='dark'?'ডার্ক':'লাইট')+'</b><br>সংস্করণ: <b>Unified 1.3</b>'}
-/* ---- হোভার সাব-মেনু ---- */
+/* ---- হোভার সাব- Menu ---- */
 var M=document.createElement('div'),mt=null,CATS=['CW','Breakdown','Efficiency','FLT','HW','Supervisor','Wastage'];M.id='submenu';document.body.appendChild(M);
 function items(k){var h='';
  if(k==='prod'){var adm=false;try{adm=F.prod.contentWindow.currentUser.role==='admin'}catch(e){}
