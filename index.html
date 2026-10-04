@@ -300,7 +300,7 @@ $('#bl-in').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileR
   c.getContext('2d').drawImage(im,0,0,c.width,c.height);pendingLogo=c.toDataURL('image/png');$('#bmsg').textContent='✔ লোগো প্রস্তুত — "সংরক্ষণ" চাপুন'};im.src=r.result};r.readAsDataURL(f)};
 function brandAdminHandle(){
   try{
-    if(F.stk&&F.stk.contentWindow&&F.stk.contentWindow.SSCM_TOKEN&&F.stk.contentWindow.SSCM_USER==='admin'){
+    if(sbPublic&&F.stk&&F.stk.contentWindow&&F.stk.contentWindow.SSCM_TOKEN&&F.stk.contentWindow.SSCM_USER==='admin'){
       return {w:F.stk.contentWindow, tok:F.stk.contentWindow.SSCM_TOKEN};
     }
   }catch(e){}
@@ -311,7 +311,7 @@ $('#bsave').onclick=function(){
   if(!h){$('#bmsg').textContent='⚠ ব্র্যান্ডিং সংরক্ষণ করতে Sticker Stock মডিউলে Admin হিসেবে লগইন থাকা আবশ্যক';return}
   var name=$('#bn-in').value.trim();var logo=pendingLogo||B.logo||'';
   $('#bmsg').textContent='সংরক্ষণ হচ্ছে…';
-  h.w.sbClient.rpc('sr_set_brand',{p_token:h.tok,p_app_name:name,p_logo_image:logo}).then(function(res){
+  sbPublic.rpc('sr_set_brand',{p_token:h.tok,p_app_name:name,p_logo_image:logo}).then(function(res){
     if(res&&res.error){$('#bmsg').textContent='⚠ সংরক্ষণ ব্যর্থ: '+res.error.message;return}
     B.name=name;B.logo=logo;pendingLogo=null;applyBrand();$('#bmsg').textContent='✔ সংরক্ষিত হয়েছে (Supabase)'
   }).catch(function(){$('#bmsg').textContent='⚠ সংরক্ষণ ব্যর্থ — ইন্টারনেট/সার্ভার সমস্যা'});
@@ -320,7 +320,7 @@ $('#breset').onclick=function(){
   var h=brandAdminHandle();
   if(!h){$('#bmsg').textContent='⚠ ডিফল্টে ফেরাতে Sticker Stock মডিউলে Admin হিসেবে লগইন থাকা আবশ্যক';return}
   $('#bmsg').textContent='সংরক্ষণ হচ্ছে…';
-  h.w.sbClient.rpc('sr_set_brand',{p_token:h.tok,p_app_name:'',p_logo_image:''}).then(function(res){
+  sbPublic.rpc('sr_set_brand',{p_token:h.tok,p_app_name:'',p_logo_image:''}).then(function(res){
     if(res&&res.error){$('#bmsg').textContent='⚠ ব্যর্থ: '+res.error.message;return}
     B={name:'',logo:''};pendingLogo=null;$('#bn-in').value='';$('#bl-in').value='';applyBrand();$('#bmsg').textContent='✔ ডিফল্টে ফেরানো হয়েছে'
   }).catch(function(){$('#bmsg').textContent='⚠ ব্যর্থ — ইন্টারনেট/সার্ভার সমস্যা'});
@@ -363,7 +363,7 @@ var bdeb=null;
 function bpush(){clearTimeout(bdeb);bdeb=setTimeout(function(){var m=document.getElementById('thm-msg'),h=brandAdminHandle();
  if(!h){m.textContent='⚠ ক্লাউডে (সব ডিভাইসে) সংরক্ষণ করতে Sticker Stock মডিউলে Admin হিসেবে লগইন থাকা আবশ্যক — এখন শুধু এই ব্রাউজারে সংরক্ষিত';return}
  m.textContent='ক্লাউডে সংরক্ষণ হচ্ছে…';
- h.w.sbClient.rpc('sr_set_theme',{p_token:h.tok,p_data:bst()}).then(function(r){m.textContent=(r&&r.error)?'⚠ ক্লাউডে সংরক্ষণ ব্যর্থ: '+r.error.message:'✔ সংরক্ষিত হয়েছে (Supabase) — সব ব্রাউজারে একই দেখাবে'}).catch(function(){m.textContent='⚠ ব্যর্থ — ইন্টারনেট/সার্ভার সমস্যা'})},500)}
+ sbPublic.rpc('sr_set_theme',{p_token:h.tok,p_data:bst()}).then(function(r){m.textContent=(r&&r.error)?'⚠ ক্লাউডে সংরক্ষণ ব্যর্থ: '+r.error.message:'✔ সংরক্ষিত হয়েছে (Supabase) — সব ব্রাউজারে একই দেখাবে'}).catch(function(){m.textContent='⚠ ব্যর্থ — ইন্টারনেট/সার্ভার সমস্যা'})},500)}
 function bload(){if(!sbPublic)return;sbPublic.rpc('sr_get_theme').then(function(r){var d=r&&!r.error&&r.data;if(d&&d.sel){d.imgs=d.imgs||[];if(d.ov==null)d.ov=45;bsave(d);bapply();brender()}}).catch(function(){})}
 function bapply(){var s=bst(),c=document.getElementById('bgc'),p,im;
  if(s.sel==='circuit'){if(c)c.style.display='';window.__bgOn=true;bx.style.display='none';return}
