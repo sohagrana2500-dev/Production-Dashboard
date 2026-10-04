@@ -105,7 +105,6 @@ h2.t{font-size:22px;margin:22px 0 4px}p.d{color:var(--mut);font-size:14px}
   <form class="card" id="lf" autocomplete="off">
     <div class="logo">SR</div>
     <h1 class="bn">SR Tech EPR System</h1>
-    <p class="s">প্রোডাকশন ড্যাশবোর্ড ও স্টিকার স্টক — এক জায়গায়</p>
     <label for="u">ইউজারনেম</label><input id="u" required autocomplete="username">
     <label for="p">পাসওয়ার্ড</label><input id="p" type="password" required autocomplete="current-password">
     <div id="err"></div>
@@ -120,16 +119,15 @@ h2.t{font-size:22px;margin:22px 0 4px}p.d{color:var(--mut);font-size:14px}
     <div class="act"><span class="chip" id="who"></span><button class="ib" id="thm" title="থিম">☀️</button><button class="ib out" id="lo">লগআউট</button></div>
   </header>
   <nav>
-    <button class="nb on" data-v="home">🏠 হোম</button>
+    <button class="nb on" data-v="home">🏠 Home</button>
     <button class="nb" data-v="prod">📊 Production Dashboard</button>
     <button class="nb" data-v="stk">🏷️ Sticker Stock</button>
-    <button class="nb" data-v="set" id="nb-set" hidden>⚙️ সেটিংস</button>
+    <button class="nb" data-v="set" id="nb-set" hidden>⚙️ Settings</button>
   </nav>
   <main>
     <section class="view" id="v-home">
       <div class="wrap">
         <div class="mq"><span>📢 স্বাগতম SR Tech EPR System-এ — প্রোডাকশন ড্যাশবোর্ড এবং স্টিকার স্টক ম্যানেজমেন্টের সকল তথ্য এখন এক জায়গায়। নিচের মডিউল বেছে নিয়ে কাজ শুরু করুন।</span></div>
-        <h2 class="t">মূল ওভারভিউ</h2><p class="d">যেকোনো মডিউল খুলুন। দুটি মডিউলের ক্যালকুলেশন ও ডাটা আগের মতোই অপরিবর্তিত আছে।</p>
         <div class="grid">
           <div class="mod"><div class="ico" style="background:linear-gradient(180deg,#38bdf8,#0369a1)">📊</div><h3>Production Dashboard</h3>
             <p>৭টি ক্যাটাগরির প্রোডাকশন ডাটা, সামারি রিপোর্ট, চার্ট, শিফট ও সুপারভাইজার পারফরম্যান্স, ওয়েস্টেজ বিশ্লেষণ।</p>
@@ -337,7 +335,7 @@ function fillInfo(u,r){var t=function(ok){return ok?'<b style="color:#22c55e">�
 var M=document.createElement('div'),mt=null,CATS=['CW','Breakdown','Efficiency','FLT','HW','Supervisor','Wastage'];M.id='submenu';document.body.appendChild(M);
 function items(k){var h='';
  if(k==='prod'){var adm=false;try{adm=F.prod.contentWindow.currentUser.role==='admin'}catch(e){}
-  h='<button class="si" data-k="prod" data-a="home">🏠 ড্যাশবোর্ড হোম</button><div class="ss">ক্যাটাগরি (নামে ক্লিক = সামারি)</div>';
+  h='<button class="si" data-k="prod" data-a="home">🏠 Dashboard Home</button><div class="ss">ক্যাটাগরি (নামে ক্লিক = সামারি)</div>';
   CATS.forEach(function(c){h+='<div class="mr"><button class="si" data-k="prod" data-a="sum" data-c="'+c+'">📊 '+c+' Data</button>'+(adm?'<button class="chip" data-k="prod" data-a="data" data-c="'+c+'">📋 ডাটা</button>':'')+'</div>'})}
  else if(k==='stk')[['entry','📝 Daily Entry'],['summary','📊 Summary'],['brands','🏷️ Brands'],['prod','🏭 Production Upload']].forEach(function(a){h+='<button class="si" data-k="stk" data-a="'+a[0]+'">'+a[1]+'</button>'});
  else if(k==='set')[['0','🎨 নাম ও লোগো'],['1','🛠️ অ্যাডমিন টুলস'],['2','🛰️ সিস্টেম তথ্য'],['3','🖼️ ব্যাগ্রাউন্ড থিম']].forEach(function(a){h+='<button class="si" data-k="set" data-a="'+a[0]+'">'+a[1]+'</button>'});
