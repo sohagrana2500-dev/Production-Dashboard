@@ -43,7 +43,7 @@ input:focus{border-color:#0ea5e9;box-shadow:inset 0 2px 4px rgba(0,0,0,.12),0 0 
 header{position:sticky;top:0;z-index:40;background:linear-gradient(90deg,#0284c7,#0d9488,#16a34a);color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 8px 20px -10px rgba(0,0,0,.6);border-bottom:1px solid rgba(0,0,0,.12)}
 .brand{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.15);padding:4px 14px 4px 5px;border-radius:99px;border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 3px rgba(0,0,0,.15)}
 .brand .logo{width:30px;height:30px;margin:0;font-size:12px;box-shadow:0 2px 4px rgba(0,0,0,.25)}.brand b{font-size:15px;letter-spacing:-.2px}
-#clock{font:900 15px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.5px;background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.12);padding:3px 14px;border-radius:10px;text-shadow:0 2px 4px rgba(0,0,0,.7)}
+#clock{font:900 20px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.5px;background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.12);padding:5px 18px;border-radius:10px;text-shadow:0 2px 4px rgba(0,0,0,.7)}
 .act{display:flex;align-items:center;gap:8px}
 .chip{font-size:11.5px;font-weight:800;padding:4px 11px;border-radius:99px;background:rgba(6,78,59,.55);border:1px solid rgba(255,255,255,.18)}
 .ib{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.18);color:#fff;font-size:16px;box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 3px 0 rgba(0,0,0,.25);transition:transform .08s,box-shadow .08s}
@@ -71,6 +71,15 @@ h2.t{font-size:22px;margin:22px 0 4px}p.d{color:var(--mut);font-size:14px}
 .mod h3{font-size:18px;margin-bottom:6px}.mod p{color:var(--mut);font-size:13.5px;line-height:1.6;min-height:66px}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}.tags i{font-style:normal;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(14,165,233,.12);color:#0ea5e9;border:1px solid rgba(14,165,233,.25)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.home-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.home-mod{padding:14px 18px;border-radius:14px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.home-mod:hover{transform:translateY(-3px);box-shadow:0 1px 0 rgba(255,255,255,.07) inset,0 6px 0 -1px var(--edge),0 14px 24px -8px rgba(0,0,0,.4)}
+.home-mod .ico{width:36px;height:36px;border-radius:10px;font-size:17px;margin-bottom:0;flex-shrink:0;background:linear-gradient(180deg,#38bdf8,#0369a1)}
+.home-mod.green .ico{background:linear-gradient(180deg,#34d399,#0f766e)}
+.home-mod h3{font-size:14.5px;margin:0;flex:1;line-height:1.3}
+.home-mod .st{font-size:11px;flex-shrink:0}
+.home-mod .go-arrow{font-size:16px;font-weight:700;color:var(--mut);flex-shrink:0;transition:transform .2s}
+.home-mod:hover .go-arrow{transform:translateX(3px);color:inherit}
 .st{font-size:12.5px;font-weight:700}.ok{color:#22c55e}.wn{color:#f59e0b}
 .btn.sm{padding:8px 14px;font-size:13px}
 .btn.gh{background:linear-gradient(180deg,var(--card),var(--bg));color:var(--ink);text-shadow:none;border:1px solid var(--line);box-shadow:0 1px 0 rgba(255,255,255,.1) inset,0 3px 0 var(--edge)}
@@ -128,15 +137,19 @@ h2.t{font-size:22px;margin:22px 0 4px}p.d{color:var(--mut);font-size:14px}
     <section class="view" id="v-home">
       <div class="wrap">
         <div class="mq"><span>📢 স্বাগতম SR Tech EPR System-এ — প্রোডাকশন ড্যাশবোর্ড এবং স্টিকার স্টক ম্যানেজমেন্টের সকল তথ্য এখন এক জায়গায়। নিচের মডিউল বেছে নিয়ে কাজ শুরু করুন।</span></div>
-        <div class="grid">
-          <div class="mod"><div class="ico" style="background:linear-gradient(180deg,#38bdf8,#0369a1)">📊</div><h3>Production Dashboard</h3>
-            <p>৭টি ক্যাটাগরির প্রোডাকশন ডাটা, সামারি রিপোর্ট, চার্ট, শিফট ও সুপারভাইজার পারফরম্যান্স, ওয়েস্টেজ বিশ্লেষণ।</p>
-            <div class="tags"><i>Summary</i><i>Charts</i><i>Excel Upload</i></div>
-            <div class="row"><span class="st" id="s-prod"></span><button class="btn" data-go="prod">খুলুন →</button></div></div>
-          <div class="mod"><div class="ico" style="background:linear-gradient(180deg,#34d399,#0f766e)">🏷️</div><h3>Sticker Stock Manager</h3>
-            <p>স্টিকার ডেইলি স্টক এন্ট্রি, P-Stock/N-Stock ক্যালকুলেশন, মান্থলি ক্লোজিং ও অপচয়, ব্র্যান্ড ক্রম ও ক্যাটালগ।</p>
-            <div class="tags"><i>Daily Entry</i><i>Closing</i><i>Brands</i></div>
-            <div class="row"><span class="st" id="s-stk"></span><button class="btn green" data-go="stk">খুলুন →</button></div></div>
+        <div class="grid home-grid">
+          <div class="mod home-mod" data-go="prod" role="button" tabindex="0">
+            <div class="ico">📊</div>
+            <h3>Production Dashboard</h3>
+            <span class="st" id="s-prod"></span>
+            <span class="go-arrow">→</span>
+          </div>
+          <div class="mod home-mod green" data-go="stk" role="button" tabindex="0">
+            <div class="ico">🏷️</div>
+            <h3>Sticker Stock Manager</h3>
+            <span class="st" id="s-stk"></span>
+            <span class="go-arrow">→</span>
+          </div>
         </div>
       </div>
     </section>
@@ -241,7 +254,7 @@ function setTheme(t){root.dataset.theme=t;$('#thm').textContent=t==='dark'?'☀�
 var saved=null;try{saved=localStorage.getItem('sr_theme')}catch(e){}
 setTheme(saved||'dark');
 $('#thm').onclick=function(){setTheme(root.dataset.theme==='dark'?'light':'dark')};
-function tick(){var d=new Date();$('#clock').textContent=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+'  '+d.toLocaleTimeString('en-GB')}
+function tick(){var d=new Date();$('#clock').textContent=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+'  '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true})}
 tick();setInterval(tick,1000);
 
 var F={prod:$('#f-prod'),stk:$('#f-stk')};
@@ -255,7 +268,7 @@ function loginStk(u,p){var w=F.stk.contentWindow,d=w.document;d.getElementById('
 
 function go(v){$$('.view').forEach(function(e){e.hidden=e.id!=='v-'+v});$$('.nb').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)})}
 $$('.nb').forEach(function(b){b.onclick=function(){go(b.dataset.v)}});
-$$('[data-go]').forEach(function(b){b.onclick=function(){go(b.dataset.go)}});
+$$('[data-go]').forEach(function(b){b.onclick=function(){go(b.dataset.go)};b.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go(b.dataset.go)}}});
 function status(k,ok){var s=$('#s-'+k);s.textContent=ok?'● লগইন সম্পন্ন':'● আলাদা লগইন প্রয়োজন';s.className='st '+(ok?'ok':'wn');$('#n-'+k).hidden=ok}
 
 $('#lf').onsubmit=function(e){
